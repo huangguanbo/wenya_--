@@ -1,0 +1,37 @@
+# Python
+venv/
+__pycache__/
+*.py[cod]
+.env
+.pytest_cache/
+
+# Node
+node_modules/
+dist/
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Database
+*.db
+*.sqlite
+
+# API & Model Memory
+.api_keys/
+api_keys.json
+*.api_key
+.cache/
+model_cache/
+embeddings/
+vector_store/
+.chroma/
+.faiss/
+memory/
+!memory/MEMORY.md

@@ -1,0 +1,75 @@
+<view class="container">
+  <!-- 欢迎区 -->
+  <view class="welcome-card">
+    <view class="welcome-text">
+      <text class="welcome-title">👋 你好，{{nickname}}！</text>
+      <text class="welcome-subtitle">继续你的写作之旅，今天也要加油哦～</text>
+    </view>
+  </view>
+
+  <!-- 统计数据 -->
+  <view class="stats-grid">
+    <view class="stat-item" wx:for="{{stats}}" wx:key="label">
+      <text class="stat-value">{{item.value}}</text>
+      <text class="stat-label">{{item.label}}</text>
+    </view>
+  </view>
+
+  <!-- 快速入口 -->
+  <view class="quick-actions">
+    <view class="card action-card">
+      <text class="card-title">📝 开始写作</text>
+      <text class="card-desc">选择一个题目，开始你的创作吧</text>
+      <button class="btn-primary" bindtap="goToWriting">新建作文</button>
+    </view>
+    
+    <view class="card action-card">
+      <text class="card-title">📖 继续写作</text>
+      <view wx:if="{{recentDraft}}">
+        <text class="card-desc ellipsis">{{recentDraft.title}}</text>
+        <text class="card-desc-small">上次编辑：{{recentDraft.updated_at}}</text>
+        <button class="btn-secondary" bindtap="continueWriting">继续编辑</button>
+      </view>
+      <view wx:else>
+        <text class="card-desc">暂无草稿</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 成长曲线 -->
+  <view class="card">
+    <text class="card-title">📈 成长曲线</text>
+    <view class="chart-container" id="growthChart"></view>
+  </view>
+
+  <!-- 最近作品 -->
+  <view class="card">
+    <view class="card-header">
+      <text class="card-title">📚 最近作品</text>
+      <text class="card-link" bindtap="viewAll">查看全部</text>
+    </view>
+    
+    <view class="work-list">
+      <view 
+        class="work-item" 
+        wx:for="{{recentWorks}}" 
+        wx:key="id"
+        bindtap="goToWorkDetail"
+        data-id="{{item.id}}"
+      >
+        <view class="work-info">
+          <text class="work-title ellipsis">{{item.title}}</text>
+          <text class="work-meta">{{item.word_count}}字 · {{item.created_at}}</text>
+        </view>
+        <view class="work-score" wx:if="{{item.overall_score}}">
+          <text class="score-value">{{item.overall_score}}</text>
+          <text class="score-unit">分</text>
+        </view>
+      </view>
+    </view>
+    
+    <view class="empty-state" wx:if="{{recentWorks.length === 0}}">
+      <text>还没有作品，快去创作吧～</text>
+    </view>
+  </view>
+</view>

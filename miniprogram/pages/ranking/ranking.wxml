@@ -1,0 +1,118 @@
+<view class="container">
+  <!-- 排行榜类型切换 -->
+  <view class="tab-bar">
+    <view 
+      class="tab-item {{currentTab === 'overall' ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-type="overall"
+    >
+      <text>🏆 综合榜</text>
+    </view>
+    <view 
+      class="tab-item {{currentTab === 'progress' ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-type="progress"
+    >
+      <text>📈 进步榜</text>
+    </view>
+    <view 
+      class="tab-item {{currentTab === 'dimension' ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-type="dimension"
+    >
+      <text>📊 维度榜</text>
+    </view>
+  </view>
+
+  <!-- 维度选择器（仅维度榜显示） -->
+  <view class="dimension-selector" wx:if="{{currentTab === 'dimension'}}">
+    <picker 
+      mode="selector" 
+      range="{{dimensions}}" 
+      range-key="label"
+      value="{{dimensionIndex}}"
+      bindchange="onDimensionChange"
+    >
+      <view class="picker-value">
+        <text>{{dimensions[dimensionIndex].label}}</text>
+        <text class="arrow">▼</text>
+      </view>
+    </picker>
+  </view>
+
+  <!-- 排行榜列表 -->
+  <view class="ranking-list">
+    <!-- 前三名 -->
+    <view class="top-three">
+      <view class="top-item second" wx:if="{{rankingList[1]}}">
+        <view class="rank-badge silver">2</view>
+        <view class="avatar" style="background-image: url({{rankingList[1].avatar}})"></view>
+        <text class="nickname">{{rankingList[1].nickname}}</text>
+        <text class="score">{{rankingList[1].score}}</text>
+      </view>
+      
+      <view class="top-item first" wx:if="{{rankingList[0]}}">
+        <view class="rank-badge gold">1</view>
+        <view class="avatar" style="background-image: url({{rankingList[0].avatar}})"></view>
+        <text class="nickname">{{rankingList[0].nickname}}</text>
+        <text class="score">{{rankingList[0].score}}</text>
+      </view>
+      
+      <view class="top-item third" wx:if="{{rankingList[2]}}">
+        <view class="rank-badge bronze">3</view>
+        <view class="avatar" style="background-image: url({{rankingList[2].avatar}})"></view>
+        <text class="nickname">{{rankingList[2].nickname}}</text>
+        <text class="score">{{rankingList[2].score}}</text>
+      </view>
+    </view>
+
+    <!-- 第 4 名及以后 -->
+    <view class="ranking-items">
+      <view 
+        class="ranking-item"
+        wx:for="{{rankingList.slice(3)}}"
+        wx:key="rank"
+        data-rank="{{index + 4}}"
+      >
+        <view class="rank-num">{{index + 4}}</view>
+        <view class="user-avatar" style="background-image: url({{item.avatar}})"></view>
+        <view class="user-info">
+          <text class="user-nickname">{{item.nickname}}</text>
+          <text class="user-grade">{{item.grade}}年级</text>
+        </view>
+        <view class="user-score">
+          <text class="score-value">{{item.score}}</text>
+          <text class="score-label" wx:if="{{currentTab === 'progress'}}">进步分</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text>加载中...</text>
+  </view>
+
+  <view class="empty-state" wx:if="{{!loading && rankingList.length === 0}}">
+    <text>暂无数据</text>
+  </view>
+
+  <!-- 我的排名 -->
+  <view class="my-rank-card" wx:if="{{myRank}}">
+    <view class="my-rank-header">
+      <text>我的排名</text>
+      <text class="rank-value">#{{myRank.rank}}</text>
+    </view>
+    <view class="my-rank-stats">
+      <view class="stat">
+        <text class="stat-label">总分</text>
+        <text class="stat-value">{{myRank.score}}</text>
+      </view>
+      <view class="stat">
+        <text class="stat-label">百分位</text>
+        <text class="stat-value">{{myRank.percentile}}%</text>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,132 @@
+<view class="container">
+  <!-- 用户信息卡片 -->
+  <view class="user-card">
+    <view class="user-header">
+      <view class="avatar" style="background-image: url({{user.avatar || '/images/default-avatar.png'}})"></view>
+      <view class="user-info">
+        <text class="nickname">{{user.nickname || user.username}}</text>
+        <view class="user-tags">
+          <text class="tag">{{user.grade_name || '未设置'}}</text>
+          <text class="tag">{{user.level || '写作新手'}}</text>
+        </view>
+      </view>
+      <view class="settings-icon" bindtap="goToSettings">
+        <text>⚙️</text>
+      </view>
+    </view>
+    
+    <!-- 统计数据 -->
+    <view class="user-stats">
+      <view class="stat-item" bindtap="navToPage" data-page="/pages/writing-detail/writing-detail">
+        <text class="stat-value">{{stats.total_writings}}</text>
+        <text class="stat-label">篇作品</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item" bindtap="navToPage" data-page="/pages/ranking/ranking">
+        <text class="stat-value">{{stats.average_score}}</text>
+        <text class="stat-label">平均分</text>
+      </view>
+      <view class="stat-divider"></view>
+      <view class="stat-item">
+        <text class="stat-value">{{stats.consecutive_days}}</text>
+        <text class="stat-label">连续天数</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 功能菜单 -->
+  <view class="menu-section">
+    <text class="section-title">我的服务</text>
+    <view class="menu-list">
+      <view class="menu-item" bindtap="navToPage" data-page="/pages/writing-detail/writing-detail">
+        <view class="menu-left">
+          <text class="menu-icon">📝</text>
+          <text class="menu-label">我的作品</text>
+        </view>
+        <text class="arrow">›</text>
+      </view>
+      
+      <view class="menu-item" bindtap="navToPage" data-page="/pages/ranking/ranking">
+        <view class="menu-left">
+          <text class="menu-icon">📊</text>
+          <text class="menu-label">成长数据</text>
+        </view>
+        <text class="arrow">›</text>
+      </view>
+      
+      <view class="menu-item" bindtap="navToPage" data-page="/pages/settings/settings?type=memory">
+        <view class="menu-left">
+          <text class="menu-icon">🧠</text>
+          <text class="menu-label">AI 记忆管理</text>
+        </view>
+        <text class="arrow">›</text>
+      </view>
+      
+      <view class="menu-item" bindtap="navToPage" data-page="/pages/settings/settings?type=guardian">
+        <view class="menu-left">
+          <text class="menu-icon">👨‍👩‍👧</text>
+          <text class="menu-label">监护人信息</text>
+        </view>
+        <text class="arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 设置菜单 -->
+  <view class="menu-section">
+    <text class="section-title">设置</text>
+    <view class="menu-list">
+      <view class="menu-item" bindtap="navToPage" data-page="/pages/settings/settings?type=privacy">
+        <view class="menu-left">
+          <text class="menu-icon">🔒</text>
+          <text class="menu-label">隐私政策</text>
+        </view>
+        <text class="arrow">›</text>
+      </view>
+
+      <view class="menu-item" bindtap="navToPage" data-page="/pages/settings/settings?type=agreement">
+        <view class="menu-left">
+          <text class="menu-icon">📄</text>
+          <text class="menu-label">用户协议</text>
+        </view>
+        <text class="arrow">›</text>
+      </view>
+
+      <view class="menu-item" bindtap="navToPage" data-page="/pages/settings/settings?type=feedback">
+        <view class="menu-left">
+          <text class="menu-icon">💬</text>
+          <text class="menu-label">意见反馈</text>
+        </view>
+        <text class="arrow">›</text>
+      </view>
+
+      <view class="menu-item" bindtap="navToPage" data-page="/pages/settings/settings?type=about">
+        <view class="menu-left">
+          <text class="menu-icon">ℹ️</text>
+          <text class="menu-label">关于我们</text>
+        </view>
+        <text class="arrow">›</text>
+      </view>
+
+      <!-- 运行日志（开发模式） -->
+      <view class="menu-item" bindtap="navToPage" data-page="/pages/logs/logs" wx:if="{{isDev}}">
+        <view class="menu-left">
+          <text class="menu-icon">🐛</text>
+          <text class="menu-label">运行日志</text>
+        </view>
+        <text class="arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 退出登录按钮 -->
+  <view class="logout-section">
+    <button class="logout-btn" bindtap="logout">退出登录</button>
+  </view>
+
+  <!-- 备案信息 -->
+  <view class="footer-info">
+    <text class="icp">{{icpNumber}}</text>
+    <text class="algorithm">{{algorithmNumber}}</text>
+  </view>
+</view>

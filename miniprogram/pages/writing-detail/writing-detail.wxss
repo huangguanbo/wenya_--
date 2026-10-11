@@ -1,0 +1,232 @@
+/* 作文详情页样式 */
+.container {
+  padding: 20rpx;
+  padding-bottom: 140rpx;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+/* 作文详情卡片 */
+.work-detail-card {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+.work-header {
+  margin-bottom: 24rpx;
+}
+
+.work-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #1f2937;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+.work-meta {
+  display: flex;
+  gap: 20rpx;
+  font-size: 24rpx;
+  color: #9ca3af;
+}
+
+.work-content {
+  max-height: 600rpx;
+}
+
+.content-text {
+  font-size: 28rpx;
+  color: #374151;
+  line-height: 2;
+  display: block;
+  white-space: pre-wrap;
+}
+
+/* 评分卡片 */
+.score-card {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+.score-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+}
+
+.score-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.overall-score {
+  text-align: center;
+}
+
+.score-value {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #16a34a;
+  display: block;
+}
+
+.score-unit {
+  font-size: 22rpx;
+  color: #9ca3af;
+  display: block;
+}
+
+/* 七维度 */
+.dimensions {
+  margin-bottom: 30rpx;
+}
+
+.dimension-item {
+  margin-bottom: 20rpx;
+}
+
+.dimension-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8rpx;
+}
+
+.dimension-name {
+  font-size: 26rpx;
+  color: #374151;
+}
+
+.dimension-score {
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #16a34a;
+}
+
+.dimension-bar {
+  height: 12rpx;
+  background-color: #f3f4f6;
+  border-radius: 6rpx;
+  overflow: hidden;
+}
+
+.dimension-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #16a34a, #059669);
+  border-radius: 6rpx;
+  transition: width 0.3s ease;
+}
+
+/* AI 评语 */
+.ai-comment {
+  background-color: #f0fdf4;
+  border-radius: 12rpx;
+  padding: 24rpx;
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.comment-icon {
+  font-size: 32rpx;
+  margin-right: 12rpx;
+}
+
+.comment-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.comment-text {
+  font-size: 26rpx;
+  color: #374151;
+  line-height: 1.8;
+  display: block;
+  margin-bottom: 20rpx;
+}
+
+/* 修改建议 */
+.suggestions {
+  margin-top: 20rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #d1fae5;
+}
+
+.suggestions-title {
+  font-size: 26rpx;
+  font-weight: bold;
+  color: #1f2937;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+.suggestion-item {
+  display: flex;
+  margin-bottom: 12rpx;
+}
+
+.suggestion-icon {
+  color: #16a34a;
+  margin-right: 12rpx;
+  font-size: 26rpx;
+}
+
+.suggestion-text {
+  flex: 1;
+  font-size: 26rpx;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+/* 操作栏 */
+.action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 20rpx;
+  padding: 20rpx 30rpx;
+  background-color: #fff;
+  border-top: 1rpx solid #f3f4f6;
+  box-shadow: 0 -2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+.action-bar button {
+  flex: 1;
+  padding: 24rpx 0;
+  font-size: 28rpx;
+  border-radius: 12rpx;
+  border: none;
+}
+
+.btn-secondary {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.btn-secondary::after {
+  border: none;
+}
+
+.btn-primary {
+  background-color: #16a34a;
+  color: #fff;
+}
+
+.btn-primary::after {
+  border: none;
+}

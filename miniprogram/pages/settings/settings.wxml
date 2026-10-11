@@ -1,0 +1,161 @@
+<view class="container">
+  <!-- 设置项列表 -->
+  <view class="settings-list">
+    <!-- 个人资料 -->
+    <view class="settings-section" wx:if="{{type === ''}}">
+      <view class="settings-item" bindtap="editProfile">
+        <text class="label">个人资料</text>
+        <text class="value">{{user.nickname}}</text>
+        <text class="arrow">›</text>
+      </view>
+      
+      <view class="settings-item" bindtap="changeGrade">
+        <text class="label">年级设置</text>
+        <text class="value">{{user.grade_name}}</text>
+        <text class="arrow">›</text>
+      </view>
+    </view>
+
+    <!-- 隐私政策 -->
+    <view class="content-section" wx:if="{{type === 'privacy'}}">
+      <scroll-view class="content-scroll" scroll-y>
+        <text class="content-title">隐私政策</text>
+        <text class="content-text">
+          文芽平台高度重视用户隐私保护。本隐私政策说明我们如何收集、使用和保护您的个人信息。
+          
+          一、信息收集
+          我们收集的信息包括：
+          1. 账号信息：用户名、手机号、监护人信息
+          2. 学习数据：作文内容、评分记录、成长曲线
+          3. 使用数据：登录时间、操作记录
+          
+          二、信息使用
+          我们使用收集的信息用于：
+          1. 提供 AI 写作指导服务
+          2. 生成个性化学习报告
+          3. 保障平台安全和合规
+          
+          三、信息保护
+          我们采取严格的技术和管理措施保护您的信息安全，包括但不限于：
+          1. 数据加密存储
+          2. 访问权限控制
+          3. 安全审计日志
+          
+          四、信息共享
+          我们不会向第三方共享您的个人信息，但以下情况除外：
+          1. 获得您的明确同意
+          2. 法律法规要求
+          3. 保护平台和他人的合法权益
+          
+          五、未成年人保护
+          作为面向未成年人的平台，我们特别注重：
+          1. 监护人同意机制
+          2. 内容安全过滤
+          3. 防沉迷保护
+          
+          如有任何问题，请联系我们：privacy@wenya.com
+        </text>
+      </scroll-view>
+    </view>
+
+    <!-- 用户协议 -->
+    <view class="content-section" wx:if="{{type === 'agreement'}}">
+      <scroll-view class="content-scroll" scroll-y>
+        <text class="content-title">用户协议</text>
+        <text class="content-text">
+          欢迎您使用文芽平台。在使用本服务前，请仔细阅读并同意以下条款：
+          
+          一、服务说明
+          文芽是一个面向 6-18 岁未成年人的 AI 辅助写作练习平台，提供：
+          1. AI 写作指导服务
+          2. 作文评分和反馈
+          3. 学习成长跟踪
+          4. 作品交流社区
+          
+          二、用户资格
+          1. 本服务面向 6-18 岁未成年人
+          2. 注册需监护人同意并提供有效联系方式
+          3. 用户应提供真实、准确的个人信息
+          
+          三、用户行为规范
+          用户不得：
+          1. 发布违法、有害内容
+          2. 侵犯他人知识产权
+          3. 进行商业推广活动
+          4. 攻击、破坏平台安全
+          
+          四、知识产权
+          1. 用户保留作品著作权
+          2. 授权平台在授权范围内使用作品
+          3. 平台提供的内容受知识产权保护
+          
+          五、隐私保护
+          平台将按照隐私政策保护用户信息，详见《隐私政策》
+          
+          六、服务变更
+          平台保留修改、中断、终止服务的权利
+          
+          七、免责声明
+          1. AI 生成内容仅供参考
+          2. 不保证服务绝对安全和无中断
+          3. 不可抗力导致的损失不承担责任
+          
+          八、协议修改
+          平台有权修改本协议，修改后继续使用视为同意
+          
+          九、法律适用
+          本协议受中华人民共和国法律管辖
+          
+          十、联系方式
+          如有任何问题，请联系：support@wenya.com
+        </text>
+      </scroll-view>
+    </view>
+
+    <!-- 意见反馈 -->
+    <view class="feedback-section" wx:if="{{type === 'feedback'}}">
+      <textarea 
+        class="feedback-input" 
+        placeholder="请留下您的宝贵意见或建议..."
+        value="{{feedbackContent}}"
+        bindinput="onFeedbackInput"
+        maxlength="500"
+      />
+      <input 
+        class="contact-input"
+        placeholder="联系方式（选填，方便我们回复）"
+        value="{{contactInfo}}"
+        bindinput="onContactInput"
+      />
+      <button class="btn-submit" bindtap="submitFeedback">提交反馈</button>
+    </view>
+
+    <!-- 关于我们 -->
+    <view class="about-section" wx:if="{{type === 'about'}}">
+      <view class="about-logo">
+        <text class="logo-text">🌱 文芽</text>
+      </view>
+      <text class="version">版本号：{{version}}</text>
+      <text class="description">文芽是一个面向 6-18 岁未成年人的 AI 辅助写作练习平台，致力于通过人工智能技术提升学生的写作能力和学习兴趣。</text>
+      
+      <view class="info-list">
+        <view class="info-item">
+          <text class="info-label">运营主体：</text>
+          <text class="info-value">XXX 科技有限公司</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">联系方式：</text>
+          <text class="info-value">support@wenya.com</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">ICP 备案：</text>
+          <text class="info-value">{{icpNumber}}</text>
+        </view>
+        <view class="info-item">
+          <text class="info-label">算法备案：</text>
+          <text class="info-value">{{algorithmNumber}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,117 @@
+<view class="writing-container">
+  <!-- 标题栏 -->
+  <view class="title-bar">
+    <input 
+      class="title-input" 
+      placeholder="作文标题" 
+      value="{{title}}" 
+      bindinput="onTitleInput"
+    />
+  </view>
+
+  <!-- 编辑器 -->
+  <view class="editor-container">
+    <textarea 
+      class="editor" 
+      placeholder="开始你的写作..." 
+      value="{{content}}"
+      bindinput="onContentInput"
+      maxlength="-1"
+      auto-height
+      show-confirm-bar="{{false}}"
+    />
+  </view>
+
+  <!-- 底部工具栏 -->
+  <view class="toolbar">
+    <view class="word-count">
+      <text>{{wordCount}} 字</text>
+      <text wx:if="{{autoSaveStatus}}" class="save-status">{{autoSaveStatus}}</text>
+    </view>
+    
+    <view class="action-buttons">
+      <button 
+        class="btn-secondary" 
+        bindtap="saveDraft"
+        disabled="{{saving || !writingId}}"
+      >
+        {{saving ? '保存中...' : '保存草稿'}}
+      </button>
+      
+      <button 
+        class="btn-primary" 
+        bindtap="submitWriting"
+        disabled="{{!canSubmit}}"
+      >
+        提交评分
+      </button>
+    </view>
+  </view>
+
+  <!-- AI 对话按钮（浮动） -->
+  <view class="ai-fab" bindtap="toggleAiChat">
+    <text>🤖</text>
+  </view>
+
+  <!-- AI 对话面板 -->
+  <view class="ai-chat-panel {{showAiChat ? 'show' : ''}}">
+    <!-- 对话历史 -->
+    <scroll-view class="chat-history" scroll-y scroll-into-view="{{scrollToView}}">
+      <view wx:if="{{messages.length === 0}}" class="empty-chat">
+        <text>向 AI 教练提问，或点击下方快捷操作开始</text>
+      </view>
+      
+      <view 
+        wx:for="{{messages}}" 
+        wx:key="index"
+        class="message-item {{item.role}}"
+        id="msg-{{index}}"
+      >
+        <view class="message-bubble {{item.role}}">
+          <text>{{item.content}}</text>
+        </view>
+      </view>
+      
+      <view wx:if="{{loading}}" class="message-item assistant">
+        <view class="message-bubble assistant">
+          <view class="loading-dots">
+            <view class="dot"></view>
+            <view class="dot"></view>
+            <view class="dot"></view>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+
+    <!-- 快捷操作 -->
+    <view class="quick-actions">
+      <button 
+        wx:for="{{quickActions}}" 
+        wx:key="value"
+        class="action-tag"
+        bindtap="sendQuickAction"
+        data-type="{{item}}"
+      >
+        {{item.label}}
+      </button>
+    </view>
+
+    <!-- 输入框 -->
+    <view class="chat-input-bar">
+      <input 
+        class="chat-input"
+        placeholder="向 AI 教练提问..."
+        value="{{inputMessage}}"
+        bindinput="onInputMessage"
+        bindconfirm="sendMessage"
+      />
+      <button 
+        class="send-btn" 
+        bindtap="sendMessage"
+        disabled="{{loading || !inputMessage.trim() || !writingId}}"
+      >
+        发送
+      </button>
+    </view>
+  </view>
+</view>

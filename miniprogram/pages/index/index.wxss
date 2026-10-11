@@ -1,0 +1,195 @@
+/* 首页样式 */
+.container {
+  padding: 20rpx;
+  padding-bottom: 140rpx;
+}
+
+/* 欢迎卡片 */
+.welcome-card {
+  background: linear-gradient(135deg, #16a34a 0%, #059669 100%);
+  border-radius: 16rpx;
+  padding: 40rpx;
+  margin-bottom: 30rpx;
+  color: #fff;
+}
+
+.welcome-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.welcome-subtitle {
+  font-size: 26rpx;
+  opacity: 0.9;
+  display: block;
+}
+
+/* 统计网格 */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20rpx;
+  margin-bottom: 30rpx;
+}
+
+.stat-item {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 24rpx 16rpx;
+  text-align: center;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+.stat-value {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #16a34a;
+  display: block;
+}
+
+.stat-label {
+  font-size: 22rpx;
+  color: #9ca3af;
+  display: block;
+  margin-top: 8rpx;
+}
+
+/* 快速操作 */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+  margin-bottom: 30rpx;
+}
+
+.action-card {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 30rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+.card-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #1f2937;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.card-desc {
+  font-size: 24rpx;
+  color: #6b7280;
+  display: block;
+  margin-bottom: 20rpx;
+  line-height: 1.5;
+}
+
+.card-desc-small {
+  font-size: 22rpx;
+  color: #9ca3af;
+  display: block;
+  margin-bottom: 20rpx;
+}
+
+/* 通用卡片 */
+.card {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24rpx;
+}
+
+.card-link {
+  font-size: 24rpx;
+  color: #16a34a;
+}
+
+/* 作品列表 */
+.work-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.work-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24rpx;
+  border: 1rpx solid #f3f4f6;
+  border-radius: 8rpx;
+  transition: background-color 0.2s;
+}
+
+.work-item:active {
+  background-color: #f9fafb;
+}
+
+.work-info {
+  flex: 1;
+  overflow: hidden;
+}
+
+.work-title {
+  font-size: 28rpx;
+  color: #1f2937;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.work-meta {
+  font-size: 22rpx;
+  color: #9ca3af;
+  display: block;
+}
+
+.work-score {
+  text-align: center;
+  margin-left: 20rpx;
+}
+
+.score-value {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #16a34a;
+  display: block;
+}
+
+.score-unit {
+  font-size: 20rpx;
+  color: #9ca3af;
+  display: block;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  justify-content: center;
+  padding: 80rpx 0;
+  color: #9ca3af;
+  font-size: 26rpx;
+}
+
+/* 文本截断 */
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 图表容器 */
+.chart-container {
+  height: 400rpx;
+  margin-top: 20rpx;
+}

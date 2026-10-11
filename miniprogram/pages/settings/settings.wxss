@@ -1,0 +1,164 @@
+/* 设置页样式 */
+.container {
+  padding: 20rpx;
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+/* 设置列表 */
+.settings-list {
+  margin-bottom: 30rpx;
+}
+
+.settings-section {
+  background-color: #fff;
+  border-radius: 12rpx;
+  overflow: hidden;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+.settings-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 28rpx 30rpx;
+  border-bottom: 1rpx solid #f3f4f6;
+}
+
+.settings-item:last-child {
+  border-bottom: none;
+}
+
+.label {
+  font-size: 28rpx;
+  color: #374151;
+}
+
+.value {
+  font-size: 26rpx;
+  color: #6b7280;
+  margin-right: 12rpx;
+}
+
+.arrow {
+  font-size: 40rpx;
+  color: #d1d5db;
+}
+
+/* 内容页面 */
+.content-section,
+.feedback-section,
+.about-section {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 30rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+
+.content-scroll {
+  height: 70vh;
+}
+
+.content-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #1f2937;
+  display: block;
+  margin-bottom: 30rpx;
+  text-align: center;
+}
+
+.content-text {
+  font-size: 26rpx;
+  color: #4b5563;
+  line-height: 2;
+  display: block;
+  white-space: pre-wrap;
+}
+
+/* 反馈表单 */
+.feedback-input {
+  width: 100%;
+  min-height: 200rpx;
+  padding: 20rpx;
+  background-color: #f9fafb;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  line-height: 1.8;
+  margin-bottom: 20rpx;
+}
+
+.contact-input {
+  width: 100%;
+  height: 80rpx;
+  padding: 0 20rpx;
+  background-color: #f9fafb;
+  border-radius: 8rpx;
+  font-size: 28rpx;
+  margin-bottom: 30rpx;
+}
+
+.btn-submit {
+  width: 100%;
+  background-color: #16a34a;
+  color: #fff;
+  border: none;
+  border-radius: 12rpx;
+  padding: 24rpx 0;
+  font-size: 30rpx;
+}
+
+.btn-submit::after {
+  border: none;
+}
+
+/* 关于我们 */
+.about-logo {
+  text-align: center;
+  padding: 40rpx 0;
+}
+
+.logo-text {
+  font-size: 64rpx;
+  font-weight: bold;
+  color: #16a34a;
+}
+
+.version {
+  display: block;
+  text-align: center;
+  font-size: 26rpx;
+  color: #9ca3af;
+  margin-bottom: 30rpx;
+}
+
+.description {
+  display: block;
+  font-size: 26rpx;
+  color: #4b5563;
+  line-height: 1.8;
+  margin-bottom: 40rpx;
+  text-align: center;
+}
+
+.info-list {
+  border-top: 1rpx solid #f3f4f6;
+  padding-top: 30rpx;
+}
+
+.info-item {
+  display: flex;
+  margin-bottom: 20rpx;
+}
+
+.info-label {
+  font-size: 26rpx;
+  color: #6b7280;
+  width: 160rpx;
+}
+
+.info-value {
+  font-size: 26rpx;
+  color: #374151;
+  flex: 1;
+}

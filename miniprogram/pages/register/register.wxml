@@ -1,0 +1,101 @@
+<view class="container">
+  <view class="register-card">
+    <view class="logo">
+      <text class="logo-text">🌱 注册文芽</text>
+      <text class="logo-subtitle">开启你的写作之旅</text>
+    </view>
+
+    <!-- 微信授权登录 -->
+    <view class="wechat-section" wx:if="{{!hasUserInfo}}">
+      <button class="wechat-btn" bindtap="getUserInfo">
+        <text class="wechat-icon">💚</text>
+        <text>微信授权登录</text>
+      </button>
+      <text class="wechat-tip">授权后可快速填写基本信息</text>
+    </view>
+
+    <!-- 注册表单 -->
+    <view class="register-form">
+      <view class="form-item">
+        <input 
+          class="input" 
+          placeholder="请输入用户名" 
+          value="{{username}}"
+          bindinput="onUsernameInput"
+        />
+      </view>
+
+      <view class="form-item">
+        <input 
+          class="input" 
+          placeholder="请输入昵称" 
+          value="{{nickname}}"
+          bindinput="onNicknameInput"
+        />
+      </view>
+
+      <view class="form-item">
+        <picker 
+          mode="selector" 
+          range="{{gradeOptions}}"
+          value="{{gradeIndex}}"
+          bindchange="onGradeChange"
+        >
+          <view class="picker-value {{gradeIndex >= 0 ? '' : 'placeholder'}}">
+            <text>{{gradeIndex >= 0 ? gradeOptions[gradeIndex] : '选择年级'}}</text>
+            <text class="arrow">▼</text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="form-item">
+        <input 
+          class="input" 
+          type="number" 
+          placeholder="监护人手机号" 
+          value="{{guardianPhone}}"
+          bindinput="onGuardianPhoneInput"
+          maxlength="11"
+        />
+      </view>
+
+      <view class="form-item code-input">
+        <input 
+          class="input" 
+          type="number" 
+          placeholder="验证码" 
+          value="{{code}}"
+          bindinput="onCodeInput"
+          maxlength="6"
+        />
+        <button 
+          class="code-btn {{canSendCode ? '' : 'disabled'}}"
+          bindtap="sendCode"
+          disabled="{{!canSendCode}}"
+        >
+          {{codeText}}
+        </button>
+      </view>
+
+      <!-- 监护人同意 -->
+      <view class="guardian-agreement">
+        <checkbox-group bindchange="onAgreementChange">
+          <label class="agreement-label">
+            <checkbox value="agree" color="#16a34a" />
+            <text class="agreement-text">我是学生的监护人，已阅读并同意</text>
+            <text class="agreement-link" bindtap="showAgreement">《用户协议》</text>
+          </label>
+        </checkbox-group>
+      </view>
+
+      <button class="btn-primary full-width" bindtap="register" disabled="{{!canRegister}}">
+        注册并登录
+      </button>
+    </view>
+
+    <view class="login-link">
+      <text>已有账号？</text>
+      <text class="link" bindtap="goToLogin">立即登录</text>
+    </view>
+  </view>
+</view>

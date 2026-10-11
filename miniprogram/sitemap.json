@@ -1,0 +1,10 @@
+{
+  "desc": "关于本文件的说明",
+  "info": "sitemap 索引",
+  "rules": [
+    {
+      "action": "allow",
+      "page": "*"
+    }
+  ]
+}

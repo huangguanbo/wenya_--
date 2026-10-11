@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="文芽 - AI 写作练习平台管理后台" />
+    <title>文芽 - 管理后台</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Noto Sans SC', 'sans-serif'],
+            },
+            colors: {
+              primary: {
+                50: '#eff6ff',
+                100: '#dbeafe',
+                200: '#bfdbfe',
+                300: '#93c5fd',
+                400: '#60a5fa',
+                500: '#3b82f6',
+                600: '#2563eb',
+                700: '#1d4ed8',
+                800: '#1e40af',
+                900: '#1e3a8a',
+              },
+              success: '#10b981',
+              warning: '#f59e0b',
+              danger: '#ef4444',
+            },
+            animation: {
+              'fade-in': 'fadeIn 0.5s ease-in-out',
+              'slide-in': 'slideIn 0.3s ease-out',
+              'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'bounce-slow': 'bounce 3s infinite',
+            },
+            keyframes: {
+              fadeIn: {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              slideIn: {
+                '0%': { transform: 'translateY(-10px)', opacity: '0' },
+                '100%': { transform: 'translateY(0)', opacity: '1' },
+              },
+            },
+            backdropBlur: {
+              xs: '2px',
+            },
+          },
+        },
+      }
+    </script>
+    
+    <style>
+      /* 自定义滚动条 */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      
+      ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+      }
+      
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+      }
+      
+      ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+      
+      /* 毛玻璃效果 */
+      .glass {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+      
+      .glass-dark {
+        background: rgba(15, 23, 42, 0.7);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      
+      /* 渐变背景 */
+      .gradient-bg {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+      
+      .gradient-bg-2 {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      }
+      
+      .gradient-bg-3 {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      }
+      
+      .gradient-bg-4 {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+      }
+      
+      /* 卡片悬停效果 */
+      .hover-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      
+      .hover-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      }
+      
+      /* 加载动画 */
+      .loader {
+        border: 3px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 3px solid #3b82f6;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      /* 聊天气泡 */
+      .chat-bubble {
+        position: relative;
+        border-radius: 18px;
+        padding: 12px 16px;
+        margin-bottom: 12px;
+        max-width: 80%;
+        animation: slideIn 0.3s ease-out;
+      }
+      
+      .chat-bubble-user {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        margin-left: auto;
+        border-bottom-right-radius: 4px;
+      }
+      
+      .chat-bubble-ai {
+        background: #f1f5f9;
+        color: #1e293b;
+        margin-right: auto;
+        border-bottom-left-radius: 4px;
+      }
+      
+      /* 记忆卡片 */
+      .memory-card {
+        background: white;
+        border-radius: 12px;
+        padding: 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+      }
+      
+      .memory-card:hover {
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+        transform: translateX(4px);
+      }
+      
+      .memory-card.profile { border-left-color: #3b82f6; }
+      .memory-card.interaction { border-left-color: #10b981; }
+      .memory-card.knowledge { border-left-color: #f59e0b; }
+      .memory-card.feedback { border-left-color: #ef4444; }
+      
+      /* 标签样式 */
+      .tag {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 16px;
+        font-size: 12px;
+        font-weight: 500;
+        margin-right: 6px;
+        margin-bottom: 6px;
+      }
+      
+      .tag-blue { background: #dbeafe; color: #1e40af; }
+      .tag-green { background: #d1fae5; color: #065f46; }
+      .tag-yellow { background: #fef3c7; color: #92400e; }
+      .tag-red { background: #fee2e2; color: #991b1b; }
+      .tag-purple { background: #ede9fe; color: #5b21b6; }
+      
+      /* 进度条动画 */
+      .progress-bar {
+        transition: width 1s ease-in-out;
+      }
+      
+      /* 工具提示 */
+      .tooltip {
+        position: relative;
+      }
+      
+      .tooltip::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 8px 12px;
+        background: #1e293b;
+        color: white;
+        border-radius: 6px;
+        font-size: 12px;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        z-index: 1000;
+      }
+      
+      .tooltip:hover::after {
+        opacity: 1;
+        visibility: visible;
+      }
+    </style>
+  </head>
+  <body class="bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 min-h-screen">
+    <!-- 顶部导航栏 -->
+    <nav class="glass sticky top-0 z-50 shadow-lg">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-full gradient-bg flex items-center justify-center">
+              <i class="fas fa-feather-alt text-white text-xl"></i>
+            </div>
+            <div>
+              <h1 class="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">文芽</h1>
+              <p class="text-xs text-gray-500">AI 写作练习平台</p>
+            </div>
+          </div>
+          
+          <div class="flex items-center space-x-4">
+            <button onclick="switchView('dashboard')" class="nav-btn px-4 py-2 rounded-lg text-gray-700 hover:bg-white transition-all" data-view="dashboard">
+              <i class="fas fa-home mr-2"></i>首页
+            </button>
+            <button onclick="switchView('memory')" class="nav-btn px-4 py-2 rounded-lg text-gray-700 hover:bg-white transition-all" data-view="memory">
+              <i class="fas fa-brain mr-2"></i>记忆管理
+            </button>
+            <button onclick="switchView('chat')" class="nav-btn px-4 py-2 rounded-lg text-gray-700 hover:bg-white transition-all" data-view="chat">
+              <i class="fas fa-comments mr-2"></i>AI 对话
+            </button>
+            <button onclick="switchView('settings')" class="nav-btn px-4 py-2 rounded-lg text-gray-700 hover:bg-white transition-all" data-view="settings">
+              <i class="fas fa-cog mr-2"></i>设置
+            </button>
+            
+            <div class="ml-4 flex items-center space-x-2">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold">
+                U
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      
+      <!-- 仪表盘视图 -->
+      <div id="dashboard-view" class="view-section animate-fade-in">
+        <!-- 欢迎横幅 -->
+        <div class="gradient-bg rounded-2xl p-8 mb-8 text-white shadow-2xl">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-3xl font-bold mb-2">👋 欢迎来到文芽</h2>
+              <p class="text-blue-100">记录你的写作成长之旅</p>
+            </div>
+            <div class="text-right">
+              <p class="text-blue-100 text-sm">今天是</p>
+              <p class="text-2xl font-semibold" id="current-date"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 统计卡片 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <!-- 总交互次数 -->
+          <div class="glass rounded-xl p-6 hover-card">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
+                <i class="fas fa-comments text-blue-600 text-xl"></i>
+              </div>
+              <span class="text-2xl font-bold text-gray-800" id="stat-interactions">0</span>
+            </div>
+            <h3 class="text-gray-600 font-medium">总交互次数</h3>
+            <div class="mt-2 flex items-center text-sm">
+              <span class="text-green-600 mr-2">
+                <i class="fas fa-arrow-up"></i> 12%
+              </span>
+              <span class="text-gray-500">较上周</span>
+            </div>
+          </div>
+
+          <!-- 记忆片段数 -->
+          <div class="glass rounded-xl p-6 hover-card">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
+                <i class="fas fa-memory text-green-600 text-xl"></i>
+              </div>
+              <span class="text-2xl font-bold text-gray-800" id="stat-fragments">0</span>
+            </div>
+            <h3 class="text-gray-600 font-medium">记忆片段</h3>
+            <div class="mt-2 flex items-center text-sm">
+              <span class="text-gray-500">已存储</span>
+            </div>
+          </div>
+
+          <!-- 作文数量 -->
+          <div class="glass rounded-xl p-6 hover-card">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center">
+                <i class="fas fa-pen-fancy text-purple-600 text-xl"></i>
+              </div>
+              <span class="text-2xl font-bold text-gray-800" id="stat-writings">0</span>
+            </div>
+            <h3 class="text-gray-600 font-medium">作文作品</h3>
+            <div class="mt-2 flex items-center text-sm">
+              <span class="text-green-600 mr-2">
+                <i class="fas fa-arrow-up"></i> 5
+              </span>
+              <span class="text-gray-500">本月新增</span>
+            </div>
+          </div>
+
+          <!-- 平均分数 -->
+          <div class="glass rounded-xl p-6 hover-card">
+            <div class="flex items-center justify-between mb-4">
+              <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center">
+                <i class="fas fa-star text-yellow-600 text-xl"></i>
+              </div>
+              <span class="text-2xl font-bold text-gray-800" id="stat-avg-score">0</span>
+            </div>
+            <h3 class="text-gray-600 font-medium">平均评分</h3>
+            <div class="mt-2 flex items-center text-sm">
+              <span class="text-green-600 mr-2">
+                <i class="fas fa-arrow-up"></i> 2.3
+              </span>
+              <span class="text-gray-500">较上月</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 图表区域 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          <!-- 成长曲线图 -->
+          <div class="glass rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+              <i class="fas fa-chart-line text-blue-600 mr-2"></i>
+              写作能力成长曲线
+            </h3>
+            <div id="growth-chart" class="h-64"></div>
+          </div>
+
+          <!-- 维度雷达图 -->
+          <div class="glass rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+              <i class="fas fa-chart-pie text-purple-600 mr-2"></i>
+              七维度能力分布
+            </h3>
+            <div id="radar-chart" class="h-64"></div>
+          </div>
+        </div>
+
+        <!-- 最近记忆 -->
+        <div class="glass rounded-xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-800">
+              <i class="fas fa-history text-green-600 mr-2"></i>
+              最近记忆
+            </h3>
+            <button onclick="switchView('memory')" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+              查看全部 <i class="fas fa-arrow-right ml-1"></i>
+            </button>
+          </div>
+          <div id="recent-memories" class="space-y-3">
+            <!-- 动态加载 -->
+          </div>
+        </div>
+      </div>
+
+      <!-- 记忆管理视图 -->
+      <div id="memory-view" class="view-section hidden animate-fade-in">
+        <div class="glass rounded-xl p-6 mb-6">
+          <h2 class="text-2xl font-bold text-gray-800 mb-2">
+            <i class="fas fa-brain text-purple-600 mr-2"></i>
+            记忆管理
+          </h2>
+          <p class="text-gray-600">管理和检索你的 AI 记忆片段</p>
+        </div>
+
+        <!-- 搜索和过滤 -->
+        <div class="glass rounded-xl p-6 mb-6">
+          <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex-1">
+              <div class="relative">
+                <input 
+                  type="text" 
+                  id="memory-search"
+                  placeholder="搜索记忆内容..."
+                  class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  @keyup.enter="searchMemories()"
+                />
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              </div>
+            </div>
+            <select id="memory-category" class="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              <option value="">全部类别</option>
+              <option value="writing_profile">写作画像</option>
+              <option value="interaction">交互记录</option>
+              <option value="knowledge">知识库</option>
+              <option value="feedback">反馈</option>
+            </select>
+            <button onclick="searchMemories()" class="px-6 py-3 gradient-bg text-white rounded-lg hover:opacity-90 transition-opacity font-medium">
+              <i class="fas fa-search mr-2"></i>搜索
+            </button>
+          </div>
+        </div>
+
+        <!-- 记忆列表 -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <!-- 记忆片段列表 -->
+          <div class="lg:col-span-2">
+            <div class="glass rounded-xl p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-800">记忆片段</h3>
+                <span class="text-sm text-gray-500" id="memory-count">0 条记忆</span>
+              </div>
+              <div id="memory-list" class="space-y-3 max-h-96 overflow-y-auto">
+                <!-- 动态加载 -->
+                <div class="text-center py-8 text-gray-500">
+                  <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                  <p>加载中...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 统计面板 -->
+          <div class="space-y-6">
+            <!-- 类别分布 -->
+            <div class="glass rounded-xl p-6">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4">类别分布</h3>
+              <div id="category-distribution" class="space-y-3">
+                <!-- 动态加载 -->
+              </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="glass rounded-xl p-6">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4">管理操作</h3>
+              <div class="space-y-3">
+                <button onclick="clearMemories('fragments')" class="w-full px-4 py-3 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition-colors font-medium">
+                  <i class="fas fa-trash-alt mr-2"></i>清空记忆片段
+                </button>
+                <button onclick="clearMemories('profile')" class="w-full px-4 py-3 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium">
+                  <i class="fas fa-user-slash mr-2"></i>清空画像
+                </button>
+                <button onclick="clearMemories('all')" class="w-full px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium">
+                  <i class="fas fa-exclamation-triangle mr-2"></i>清空所有
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI 对话视图 -->
+      <div id="chat-view" class="view-section hidden animate-fade-in">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-12rem)]">
+          <!-- 聊天窗口 -->
+          <div class="lg:col-span-2 glass rounded-xl flex flex-col">
+            <!-- 聊天头部 -->
+            <div class="p-4 border-b border-gray-200">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <div class="w-10 h-10 rounded-full gradient-bg flex items-center justify-center">
+                    <i class="fas fa-robot text-white text-lg"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-gray-800">AI 写作教练</h3>
+                    <p class="text-sm text-green-600">
+                      <i class="fas fa-circle text-xs mr-1"></i>在线
+                    </p>
+                  </div>
+                </div>
+                <button onclick="clearChat()" class="text-gray-500 hover:text-gray-700">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- 聊天内容 -->
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4">
+              <!-- 欢迎消息 -->
+              <div class="chat-bubble chat-bubble-ai">
+                <p>👋 你好！我是你的 AI 写作教练。有什么写作问题想要咨询吗？我可以帮你：</p>
+                <ul class="mt-2 space-y-1 text-sm">
+                  <li>• 分析作文结构</li>
+                  <li>• 提供写作建议</li>
+                  <li>• 解答写作疑惑</li>
+                  <li>• 分享写作技巧</li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- 输入区域 -->
+            <div class="p-4 border-t border-gray-200">
+              <div class="flex items-center space-x-3">
+                <input 
+                  type="text" 
+                  id="chat-input"
+                  placeholder="输入你的问题..."
+                  class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  @keyup.enter="sendMessage()"
+                />
+                <button onclick="sendMessage()" class="px-6 py-3 gradient-bg text-white rounded-lg hover:opacity-90 transition-opacity font-medium">
+                  <i class="fas fa-paper-plane"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 侧边栏 -->
+          <div class="space-y-6">
+            <!-- 对话历史 -->
+            <div class="glass rounded-xl p-4">
+              <h3 class="text-lg font-semibold text-gray-800 mb-3">
+                <i class="fas fa-history mr-2"></i>对话历史
+              </h3>
+              <div id="chat-history" class="space-y-2 max-h-48 overflow-y-auto">
+                <!-- 动态加载 -->
+              </div>
+            </div>
+
+            <!-- 快速问题 -->
+            <div class="glass rounded-xl p-4">
+              <h3 class="text-lg font-semibold text-gray-800 mb-3">
+                <i class="fas fa-bolt mr-2"></i>快速提问
+              </h3>
+              <div class="space-y-2">
+                <button onclick="quickAsk('如何提高作文开头？')" class="w-full text-left px-3 py-2 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm transition-colors">
+                  ✨ 如何提高作文开头？
+                </button>
+                <button onclick="quickAsk('怎样让文章更有逻辑性？')" class="w-full text-left px-3 py-2 bg-purple-50 hover:bg-purple-100 rounded-lg text-sm transition-colors">
+                  📋 怎样让文章更有逻辑性？
+                </button>
+                <button onclick="quickAsk('如何积累写作素材？')" class="w-full text-left px-3 py-2 bg-green-50 hover:bg-green-100 rounded-lg text-sm transition-colors">
+                  📚 如何积累写作素材？
+                </button>
+                <button onclick="quickAsk('结尾怎么写更好？')" class="w-full text-left px-3 py-2 bg-yellow-50 hover:bg-yellow-100 rounded-lg text-sm transition-colors">
+                  🎯 结尾怎么写更好？
+                </button>
+              </div>
+            </div>
+
+            <!-- 记忆增强状态 -->
+            <div class="glass rounded-xl p-4">
+              <h3 class="text-lg font-semibold text-gray-800 mb-3">
+                <i class="fas fa-brain mr-2"></i>记忆增强
+              </h3>
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm text-gray-600">状态</span>
+                <span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">已启用</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-gray-600">相关记忆</span>
+                <span class="text-sm font-semibold" id="chat-memory-count">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 设置视图 -->
+      <div id="settings-view" class="view-section hidden animate-fade-in">
+        <div class="max-w-3xl mx-auto">
+          <div class="glass rounded-xl p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">
+              <i class="fas fa-cog text-gray-600 mr-2"></i>
+              系统设置
+            </h2>
+            <p class="text-gray-600">配置 AI 服务和记忆功能</p>
+          </div>
+
+          <!-- API 配置 -->
+          <div class="glass rounded-xl p-6 mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+              <i class="fas fa-plug mr-2"></i>AI 服务配置
+            </h3>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">AI 提供商</label>
+                <select id="setting-provider" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                  <option value="openai">OpenAI (GPT-4)</option>
+                  <option value="claude">Claude (Anthropic)</option>
+                  <option value="aliyun">通义千问 (阿里云)</option>
+                  <option value="deepseek">DeepSeek</option>
+                  <option value="moonshot">月之暗面</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">API Key</label>
+                <input 
+                  type="password" 
+                  id="setting-apikey"
+                  placeholder="sk-..."
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">模型名称</label>
+                <input 
+                  type="text" 
+                  id="setting-model"
+                  placeholder="gpt-4o"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <button onclick="saveSettings()" class="px-6 py-2 gradient-bg text-white rounded-lg hover:opacity-90 transition-opacity font-medium">
+                <i class="fas fa-save mr-2"></i>保存配置
+              </button>
+            </div>
+          </div>
+
+          <!-- 功能开关 -->
+          <div class="glass rounded-xl p-6 mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+              <i class="fas fa-toggle-on mr-2"></i>功能开关
+            </h3>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h4 class="font-medium text-gray-800">记忆增强</h4>
+                  <p class="text-sm text-gray-500">启用 AI 记忆检索和持久化</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="setting-memory" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <h4 class="font-medium text-gray-800">API 缓存</h4>
+                  <p class="text-sm text-gray-500">缓存 API 响应减少重复调用</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" id="setting-cache" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- 关于 -->
+          <div class="glass rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+              <i class="fas fa-info-circle mr-2"></i>关于文芽
+            </h3>
+            <div class="space-y-2 text-sm text-gray-600">
+              <p><strong>版本：</strong>v1.2.0</p>
+              <p><strong>更新时间：</strong>2026-10-04</p>
+              <p><strong>功能：</strong>AI 写作评分、记忆增强、多模型支持</p>
+              <p><strong>技术支持：</strong>查看 <a href="#" class="text-blue-600 hover:underline">API_MEMORY_GUIDE.md</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Toast 通知 -->
+    <div id="toast" class="fixed bottom-4 right-4 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+      <div class="glass rounded-lg px-6 py-4 shadow-2xl flex items-center space-x-3">
+        <i id="toast-icon" class="fas fa-check-circle text-green-600 text-xl"></i>
+        <span id="toast-message" class="text-gray-800 font-medium">操作成功</span>
+      </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+      // ==================== 全局状态 ====================
+      const API_BASE = '/api';
+      let currentView = 'dashboard';
+      let chatMessages = [];
+      let memories = [];
+      let stats = {};
+
+      // ==================== 工具函数 ====================
+      function $(id) {
+        return document.getElementById(id);
+      }
+
+      function showToast(message, type = 'success') {
+        const toast = $('toast');
+        const icon = $('toast-icon');
+        const msg = $('toast-message');
+        
+        icon.className = `fas ${type === 'success' ? 'fa-check-circle text-green-600' : 'fa-exclamation-circle text-red-600'} text-xl`;
+        msg.textContent = message;
+        
+        toast.classList.remove('translate-y-20', 'opacity-0');
+        setTimeout(() => {
+          toast.classList.add('translate-y-20', 'opacity-0');
+        }, 3000);
+      }
+
+      function formatDate(date) {
+        const now = date || new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+        return `${year}年${month}月${day}日 ${weekdays[now.getDay()]}`;
+      }
+
+      // ==================== 视图切换 ====================
+      function switchView(viewName) {
+        // 隐藏所有视图
+        document.querySelectorAll('.view-section').forEach(el => {
+          el.classList.add('hidden');
+        });
+        
+        // 显示目标视图
+        $(`${viewName}-view`).classList.remove('hidden');
+        
+        // 更新导航按钮状态
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+          btn.classList.remove('bg-white', 'text-blue-600');
+          btn.classList.add('text-gray-700');
+        });
+        
+        const activeBtn = document.querySelector(`[data-view="${viewName}"]`);
+        if (activeBtn) {
+          activeBtn.classList.remove('text-gray-700');
+          activeBtn.classList.add('bg-white', 'text-blue-600');
+        }
+        
+        currentView = viewName;
+        
+        // 加载对应数据
+        loadViewData(viewName);
+      }
+
+      async function loadViewData(viewName) {
+        if (viewName === 'dashboard') {
+          await loadDashboardData();
+        } else if (viewName === 'memory') {
+          await loadMemories();
+        } else if (viewName === 'chat') {
+          // Chat already loaded
+        } else if (viewName === 'settings') {
+          loadSettings();
+        }
+      }
+
+      // ==================== API 调用 ====================
+      async function apiCall(endpoint, options = {}) {
+        try {
+          const response = await fetch(`${API_BASE}${endpoint}`, {
+            ...options,
+            headers: {
+              'Content-Type': 'application/json',
+              ...options.headers,
+            },
+            credentials: 'include',
+          });
+          
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+          
+          return await response.json();
+        } catch (error) {
+          console.error('API 调用失败:', error);
+          showToast(`API 调用失败：${error.message}`, 'error');
+          return null;
+        }
+      }
+
+      // ==================== 仪表盘数据 ====================
+      async function loadDashboardData() {
+        // 设置日期
+        $('current-date').textContent = formatDate();
+        
+        // 加载统计
+        const statsResult = await apiCall('/memory/stats');
+        if (statsResult && statsResult.data) {
+          stats = statsResult.data;
+          $('stat-interactions').textContent = stats.user_stats?.total_interactions || 0;
+          $('stat-fragments').textContent = stats.system_stats?.total_fragments || 0;
+          $('stat-writings').textContent = Math.floor(Math.random() * 50) + 10; // 模拟数据
+          $('stat-avg-score').textContent = (Math.random() * 10 + 75).toFixed(1); // 模拟数据
+        }
+        
+        // 加载图表
+        renderGrowthChart();
+        renderRadarChart();
+        
+        // 加载最近记忆
+        loadRecentMemories();
+      }
+
+      function renderGrowthChart() {
+        const chart = echarts.init($('growth-chart'));
+        const option = {
+          tooltip: {
+            trigger: 'axis',
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            borderColor: '#e2e8f0',
+            textStyle: { color: '#1e293b' }
+          },
+          grid: { left: '3%', right: '4%', bottom: '3%', top: '10%', containLabel: true },
+          xAxis: {
+            type: 'category',
+            data: ['9 月', '10 月', '11 月', '12 月', '1 月', '2 月', '3 月'],
+            axisLine: { lineStyle: { color: '#94a3b8' } }
+          },
+          yAxis: {
+            type: 'value',
+            min: 60,
+            max: 100,
+            axisLine: { lineStyle: { color: '#94a3b8' } },
+            splitLine: { lineStyle: { color: '#e2e8f0', type: 'dashed' } }
+          },
+          series: [{
+            data: [72, 75, 78, 76, 82, 85, 88],
+            type: 'line',
+            smooth: true,
+            symbol: 'circle',
+            symbolSize: 8,
+            itemStyle: {
+              color: '#3b82f6',
+              borderColor: '#fff',
+              borderWidth: 2
+            },
+            areaStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: 'rgba(59, 130, 246, 0.3)' },
+                { offset: 1, color: 'rgba(59, 130, 246, 0.05)' }
+              ])
+            }
+          }]
+        };
+        chart.setOption(option);
+      }
+
+      function renderRadarChart() {
+        const chart = echarts.init($('radar-chart'));
+        const option = {
+          tooltip: {
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            borderColor: '#e2e8f0',
+            textStyle: { color: '#1e293b' }
+          },
+          radar: {
+            indicator: [
+              { name: '任务完成', max: 100 },
+              { name: '主题立意', max: 100 },
+              { name: '内容充实', max: 100 },
+              { name: '结构逻辑', max: 100 },
+              { name: '语言表达', max: 100 },
+              { name: '文体规范', max: 100 },
+              { name: '思维深度', max: 100 }
+            ],
+            axisName: {
+              color: '#64748b',
+              fontSize: 11
+            },
+            splitArea: {
+              areaStyle: {
+                color: ['rgba(59, 130, 246, 0.05)', 'rgba(59, 130, 246, 0.1)']
+              }
+            }
+          },
+          series: [{
+            type: 'radar',
+            data: [{
+              value: [85, 78, 82, 80, 88, 75, 70],
+              name: '当前能力',
+              areaStyle: {
+                color: 'rgba(59, 130, 246, 0.3)'
+              },
+              lineStyle: {
+                color: '#3b82f6',
+                width: 2
+              },
+              itemStyle: {
+                color: '#3b82f6'
+              }
+            }]
+          }]
+        };
+        chart.setOption(option);
+      }
+
+      async function loadRecentMemories() {
+        const result = await apiCall('/memory/fragments?top_k=5');
+        const container = $('recent-memories');
+        
+        if (result && result.data && result.data.fragments) {
+          memories = result.data.fragments;
+          container.innerHTML = memories.map(m => `
+            <div class="memory-card ${getMemoryCategoryClass(m.category)} p-4">
+              <div class="flex items-start justify-between mb-2">
+                <p class="text-sm text-gray-800 flex-1">${m.content}</p>
+                <span class="text-xs text-gray-500 ml-2">${formatMemoryDate(m.created_at)}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="tag ${getCategoryTagClass(m.category)}">${getCategoryName(m.category)}</span>
+                <span class="text-xs text-gray-500">重要性：${(m.importance * 100).toFixed(0)}%</span>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          container.innerHTML = '<p class="text-center text-gray-500 py-4">暂无记忆数据</p>';
+        }
+      }
+
+      // ==================== 记忆管理 ====================
+      async function loadMemories() {
+        const result = await apiCall('/memory/fragments?top_k=50');
+        const container = $('memory-list');
+        
+        if (result && result.data && result.data.fragments) {
+          memories = result.data.fragments;
+          $('memory-count').textContent = `${memories.length} 条记忆`;
+          
+          if (memories.length === 0) {
+            container.innerHTML = '<p class="text-center text-gray-500 py-8">暂无记忆数据</p>';
+          } else {
+            container.innerHTML = memories.map(m => `
+              <div class="memory-card ${getMemoryCategoryClass(m.category)}">
+                <div class="flex items-start justify-between mb-2">
+                  <p class="text-sm text-gray-800 flex-1">${m.content}</p>
+                </div>
+                <div class="flex items-center justify-between">
+                  <div>
+                    <span class="tag ${getCategoryTagClass(m.category)}">${getCategoryName(m.category)}</span>
+                  </div>
+                  <span class="text-xs text-gray-500">重要性：${(m.importance * 100).toFixed(0)}%</span>
+                </div>
+              </div>
+            `).join('');
+          }
+          
+          // 更新类别分布
+          updateCategoryDistribution();
+        }
+      }
+
+      async function searchMemories() {
+        const query = $('memory-search').value;
+        const category = $('memory-category').value;
+        
+        let url = '/memory/fragments?top_k=50';
+        if (query) url += `&q=${encodeURIComponent(query)}`;
+        if (category) url += `&category=${category}`;
+        
+        showToast('搜索中...', 'success');
+        await loadMemories();
+      }
+
+      async function clearMemories(type) {
+        if (!confirm(`确定要清空${type === 'all' ? '所有' : type === 'fragments' ? '记忆片段' : '画像'}吗？此操作不可恢复。`)) {
+          return;
+        }
+        
+        const result = await apiCall('/memory/clear', {
+          method: 'POST',
+          body: JSON.stringify({ type })
+        });
+        
+        if (result) {
+          showToast('清空成功', 'success');
+          await loadMemories();
+          await loadDashboardData();
+        }
+      }
+
+      function updateCategoryDistribution() {
+        const categories = {
+          writing_profile: 0,
+          interaction: 0,
+          knowledge: 0,
+          feedback: 0
+        };
+        
+        memories.forEach(m => {
+          if (categories[m.category] !== undefined) {
+            categories[m.category]++;
+          }
+        });
+        
+        const total = memories.length || 1;
+        const container = $('category-distribution');
+        
+        container.innerHTML = Object.entries(categories).map(([cat, count]) => {
+          const percentage = (count / total * 100).toFixed(0);
+          return `
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 rounded-full ${getCategoryColor(cat)}"></div>
+                <span class="text-sm text-gray-700">${getCategoryName(cat)}</span>
+              </div>
+              <div class="text-right">
+                <span class="text-sm font-semibold text-gray-800">${count}</span>
+                <span class="text-xs text-gray-500">(${percentage}%)</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // ==================== AI 对话 ====================
+      async function sendMessage() {
+        const input = $('chat-input');
+        const message = input.value.trim();
+        
+        if (!message) return;
+        
+        // 添加用户消息
+        addChatMessage(message, 'user');
+        input.value = '';
+        
+        // 显示加载状态
+        const loadingId = addLoadingIndicator();
+        
+        // 调用 API
+        const result = await apiCall('/writing/ai-chat', {
+          method: 'POST',
+          body: JSON.stringify({
+            message: message,
+            session_type: 'writing_guidance'
+          })
+        });
+        
+        // 移除加载指示
+        removeLoadingIndicator(loadingId);
+        
+        if (result && result.data && result.data.response) {
+          addChatMessage(result.data.response, 'ai');
+        } else {
+          addChatMessage('抱歉，AI 教练暂时不可用，请稍后再试。', 'ai');
+        }
+      }
+
+      function quickAsk(question) {
+        $('chat-input').value = question;
+        sendMessage();
+      }
+
+      function addChatMessage(content, role) {
+        const container = $('chat-messages');
+        const bubbleClass = role === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai';
+        
+        const bubble = document.createElement('div');
+        bubble.className = `chat-bubble ${bubbleClass}`;
+        bubble.innerHTML = `<p>${content}</p>`;
+        
+        container.appendChild(bubble);
+        container.scrollTop = container.scrollHeight;
+        
+        chatMessages.push({ role, content });
+      }
+
+      function addLoadingIndicator() {
+        const container = $('chat-messages');
+        const id = 'loading-' + Date.now();
+        
+        const bubble = document.createElement('div');
+        bubble.id = id;
+        bubble.className = 'chat-bubble chat-bubble-ai';
+        bubble.innerHTML = `
+          <div class="flex items-center space-x-2">
+            <div class="loader" style="width: 20px; height: 20px; border-width: 2px;"></div>
+            <span class="text-sm text-gray-500">AI 思考中...</span>
+          </div>
+        `;
+        
+        container.appendChild(bubble);
+        container.scrollTop = container.scrollHeight;
+        
+        return id;
+      }
+
+      function removeLoadingIndicator(id) {
+        const bubble = $(id);
+        if (bubble) {
+          bubble.remove();
+        }
+      }
+
+      function clearChat() {
+        chatMessages = [];
+        $('chat-messages').innerHTML = `
+          <div class="chat-bubble chat-bubble-ai">
+            <p>👋 对话已清空。有什么新的问题想要咨询吗？</p>
+          </div>
+        `;
+        showToast('对话已清空', 'success');
+      }
+
+      // ==================== 设置 ====================
+      function loadSettings() {
+        // 从 localStorage 加载配置
+        const provider = localStorage.getItem('ai_provider') || 'openai';
+        const model = localStorage.getItem('ai_model') || 'gpt-4o';
+        const memoryEnabled = localStorage.getItem('ai_memory') !== 'false';
+        const cacheEnabled = localStorage.getItem('ai_cache') !== 'false';
+        
+        $('setting-provider').value = provider;
+        $('setting-model').value = model;
+        $('setting-memory').checked = memoryEnabled;
+        $('setting-cache').checked = cacheEnabled;
+      }
+
+      async function saveSettings() {
+        const provider = $('setting-provider').value;
+        const model = $('setting-model').value;
+        const memoryEnabled = $('setting-memory').checked;
+        const cacheEnabled = $('setting-cache').checked;
+        
+        // 保存到 localStorage
+        localStorage.setItem('ai_provider', provider);
+        localStorage.setItem('ai_model', model);
+        localStorage.setItem('ai_memory', memoryEnabled);
+        localStorage.setItem('ai_cache', cacheEnabled);
+        
+        showToast('设置已保存', 'success');
+      }
+
+      // ==================== 辅助函数 ====================
+      function getMemoryCategoryClass(category) {
+        const classes = {
+          writing_profile: 'profile',
+          interaction: 'interaction',
+          knowledge: 'knowledge',
+          feedback: 'feedback'
+        };
+        return classes[category] || '';
+      }
+
+      function getCategoryTagClass(category) {
+        const classes = {
+          writing_profile: 'tag-blue',
+          interaction: 'tag-green',
+          knowledge: 'tag-yellow',
+          feedback: 'tag-red'
+        };
+        return classes[category] || 'tag-blue';
+      }
+
+      function getCategoryName(category) {
+        const names = {
+          writing_profile: '写作画像',
+          interaction: '交互记录',
+          knowledge: '知识库',
+          feedback: '反馈'
+        };
+        return names[category] || category;
+      }
+
+      function getCategoryColor(category) {
+        const colors = {
+          writing_profile: 'bg-blue-500',
+          interaction: 'bg-green-500',
+          knowledge: 'bg-yellow-500',
+          feedback: 'bg-red-500'
+        };
+        return colors[category] || 'bg-gray-500';
+      }
+
+      function formatMemoryDate(isoString) {
+        if (!isoString) return '';
+        const date = new Date(isoString);
+        const now = new Date();
+        const diff = now - date;
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        
+        if (days === 0) return '今天';
+        if (days === 1) return '昨天';
+        if (days < 7) return `${days}天前`;
+        
+        return `${date.getMonth() + 1}/${date.getDate()}`;
+      }
+
+      // ==================== 初始化 ====================
+      document.addEventListener('DOMContentLoaded', () => {
+        // 默认显示仪表盘
+        switchView('dashboard');
+        
+        // 窗口大小改变时重新渲染图表
+        window.addEventListener('resize', () => {
+          if ($('growth-chart')) {
+            echarts.getInstanceByDom($('growth-chart'))?.resize();
+          }
+          if ($('radar-chart')) {
+            echarts.getInstanceByDom($('radar-chart'))?.resize();
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
