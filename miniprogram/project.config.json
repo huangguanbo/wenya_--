@@ -40,11 +40,13 @@
     "localPlugins": false,
     "disableUseStrict": false,
     "useCompilerPlugins": false,
-    "condition": false
+    "condition": false,
+    "swc": false,
+    "disableSWC": true
   },
   "compileType": "mini-program",
-  "libVersion": "2.19.4",
-  "appid": "wx732fa230b47dc3f9",
+  "libVersion": "3.17.3",
+  "appid": "touristappid",
   "projectname": "wenya-miniprogram",
   "condition": {},
   "editorSetting": {
