@@ -1,6 +1,6 @@
 {
   "libVersion": "3.17.3",
-  "projectname": "wenya-miniprogram",
+  "projectname": "miniprogram",
   "condition": {},
   "setting": {
     "urlCheck": true,

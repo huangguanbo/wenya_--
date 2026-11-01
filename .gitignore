@@ -35,3 +35,4 @@ vector_store/
 .faiss/
 memory/
 !memory/MEMORY.md
+.venv
