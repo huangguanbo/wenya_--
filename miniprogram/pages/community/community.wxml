@@ -1,9 +1,9 @@
 <view class="container">
   <!-- 筛选栏 -->
   <view class="filter-bar">
-    <picker 
-      mode="selector" 
-      range="{{gradeOptions}}" 
+    <picker
+      mode="selector"
+      range="{{gradeOptions}}"
       range-key="label"
       value="{{gradeIndex}}"
       bindchange="onGradeChange"
@@ -13,24 +13,11 @@
         <text class="arrow">▼</text>
       </view>
     </picker>
-    
-    <picker 
-      mode="selector" 
-      range="{{sortOptions}}" 
-      range-key="label"
-      value="{{sortIndex}}"
-      bindchange="onSortChange"
-    >
-      <view class="filter-item">
-        <text>{{sortOptions[sortIndex].label}}</text>
-        <text class="arrow">▼</text>
-      </view>
-    </picker>
   </view>
 
   <!-- 作品列表 -->
   <view class="works-list">
-    <view 
+    <view
       class="work-card"
       wx:for="{{works}}"
       wx:key="id"
@@ -50,18 +37,18 @@
           <text class="score-label">分</text>
         </view>
       </view>
-      
+
       <view class="work-content">
         <text class="work-title">{{item.title}}</text>
         <text class="work-excerpt ellipsis-3">{{item.excerpt}}</text>
       </view>
-      
+
       <view class="work-footer">
         <view class="work-meta">
           <text class="word-count">{{item.word_count}}字</text>
           <text class="grade-tag">{{item.grade_name}}</text>
         </view>
-        
+
         <view class="interactions">
           <view class="interaction-item" bindtap="toggleLike" data-id="{{item.id}}" catchtap="true">
             <text class="icon {{item.is_liked ? 'liked' : ''}}">❤️</text>

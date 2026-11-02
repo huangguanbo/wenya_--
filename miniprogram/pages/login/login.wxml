@@ -1,5 +1,5 @@
 <view class="container">
-  <!-- 登录表单 -->
+  <!-- 登录卡片 -->
   <view class="login-card">
     <view class="logo">
       <text class="logo-text">🌱 文芽</text>
@@ -12,52 +12,7 @@
         <text class="wechat-icon">💚</text>
         <text>微信一键登录</text>
       </button>
-    </view>
-
-    <view class="divider">
-      <text>或</text>
-    </view>
-
-    <!-- 手机号登录 -->
-    <view class="phone-login-form">
-      <view class="form-item">
-        <input 
-          class="input" 
-          type="number" 
-          placeholder="请输入手机号" 
-          value="{{phone}}"
-          bindinput="onPhoneInput"
-          maxlength="11"
-        />
-      </view>
-
-      <view class="form-item code-input">
-        <input 
-          class="input" 
-          type="number" 
-          placeholder="请输入验证码" 
-          value="{{code}}"
-          bindinput="onCodeInput"
-          maxlength="6"
-        />
-        <button 
-          class="code-btn {{canSendCode ? '' : 'disabled'}}"
-          bindtap="sendCode"
-          disabled="{{!canSendCode}}"
-        >
-          {{codeText}}
-        </button>
-      </view>
-
-      <button class="btn-primary full-width" bindtap="login" disabled="{{!canLogin}}">
-        登录
-      </button>
-    </view>
-
-    <!-- 注册链接 -->
-    <view class="register-link">
-      <text>还没有账号？</text>
-      <text class="link" bindtap="goToRegister">立即注册</text>
+      <text class="wechat-tip">使用微信身份快捷登录，无需注册</text>
     </view>
   </view>
 

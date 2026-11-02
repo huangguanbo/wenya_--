@@ -54,12 +54,6 @@
 - [x] `pages/login/login.wxss`
 - [x] `pages/login/login.json`
 
-### 注册
-- [x] `pages/register/register.wxml`
-- [x] `pages/register/register.js`
-- [x] `pages/register/register.wxss`
-- [x] `pages/register/register.json`
-
 ### 作文详情
 - [x] `pages/writing-detail/writing-detail.wxml`
 - [x] `pages/writing-detail/writing-detail.js`

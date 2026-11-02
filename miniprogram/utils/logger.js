@@ -165,6 +165,8 @@ async function reportLog(log) {
  * 批量上报日志
  */
 async function reportLogs() {
+  if (!ENABLE_REPORT) return
+
   const logs = getStoredLogs()
   if (logs.length === 0) return
   

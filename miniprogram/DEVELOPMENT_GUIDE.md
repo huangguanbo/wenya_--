@@ -21,7 +21,6 @@ miniprogram/
 │   ├── community/           # 社区
 │   ├── profile/             # 个人中心
 │   ├── login/               # 登录
-│   ├── register/            # 注册
 │   ├── writing-detail/      # 作文详情
 │   └── settings/            # 设置
 ├── components/               # 自定义组件（待扩展）
@@ -52,7 +51,7 @@ miniprogram/
 ```javascript
 module.exports = {
   // 开发环境（本地）
-  API_BASE_URL: 'http://192.168.1.100:5000/api',
+  API_BASE_URL: 'http://192.168.1.100:5001/api',
   
   // 生产环境
   // API_BASE_URL: 'https://api.wenya.com/api',
@@ -90,9 +89,7 @@ CORS_ORIGINS = 'https://servicewechat.com,your-backend.com'
 
 小程序采用微信登录 + 后端 JWT 认证：
 
-1. **微信一键登录**: 调用 `wx.login()` 获取 code，发送到后端换取 token
-2. **手机号登录**: 输入手机号 + 验证码登录
-3. **注册**: 需监护人手机号验证
+1. **微信一键登录**: 调用 `wx.login()` 获取 code，发送到后端换取 token，无需注册
 
 ### API 调用
 

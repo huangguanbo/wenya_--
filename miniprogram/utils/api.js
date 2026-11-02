@@ -4,124 +4,179 @@
 const config = require('./config')
 const logger = require('./logger')
 
-// 获取存储的 token
+const COOKIE_KEY = 'wenya_session_cookie'
+
 function getToken() {
   return wx.getStorageSync('token') || ''
 }
 
-// 统一处理请求
+function getCookie() {
+  return wx.getStorageSync(COOKIE_KEY) || ''
+}
+
+function saveSessionCookie(header) {
+  const raw = header && (header['Set-Cookie'] || header['set-cookie'])
+  if (!raw) return
+
+  const cookies = Array.isArray(raw) ? raw : [raw]
+  const session = cookies
+    .map(item => item.split(';')[0].trim())
+    .find(item => item.startsWith('session='))
+
+  if (session) {
+    wx.setStorageSync(COOKIE_KEY, session)
+  }
+}
+
+function buildHeader(contentType = 'application/json') {
+  const header = {}
+  if (contentType) {
+    header['Content-Type'] = contentType
+  }
+
+  const token = getToken()
+  if (token) {
+    header['Authorization'] = `Bearer ${token}`
+  }
+
+  const cookie = getCookie()
+  if (cookie) {
+    header['Cookie'] = cookie
+  }
+
+  return header
+}
+
+function errorMessage(data, fallback) {
+  if (data && typeof data === 'object') {
+    return data.message || data.error || fallback
+  }
+  return fallback
+}
+
+function handleUnauthorized() {
+  wx.removeStorageSync('token')
+  wx.removeStorageSync('user')
+  wx.removeStorageSync(COOKIE_KEY)
+  wx.reLaunch({
+    url: '/pages/login/login'
+  })
+}
+
 function request(options) {
   return new Promise((resolve, reject) => {
-    const token = getToken()
-    
     wx.request({
       url: config.API_BASE_URL + options.url,
       method: options.method || 'GET',
       data: options.data || {},
-      header: {
-        'Content-Type': 'application/json',
-        'Authorization': token ? `Bearer ${token}` : ''
-      },
+      header: buildHeader(),
       timeout: config.TIMEOUT,
       success: (res) => {
-        // 统一处理响应
-        if (res.statusCode === 200 && res.data) {
-          // 业务错误处理
+        saveSessionCookie(res.header)
+
+        if (res.statusCode >= 200 && res.statusCode < 300 && res.data) {
           if (res.data.code !== undefined && res.data.code !== 0) {
+            const message = errorMessage(res.data, '请求失败')
             logger.warning('API 业务错误', {
               url: options.url,
               method: options.method,
               code: res.data.code,
-              message: res.data.message || res.data.error
+              message
             })
             wx.showToast({
-              title: res.data.message || '请求失败',
+              title: message,
               icon: 'none'
             })
-            reject(res.data)
-          } else {
-            resolve(res.data)
+            reject(new Error(message))
+            return
           }
-        } else if (res.statusCode === 401) {
-          // 未授权，清除登录状态
+          resolve(res.data)
+          return
+        }
+
+        if (res.statusCode === 401) {
           logger.warning('API 请求未授权', {
             url: options.url,
             method: options.method
           })
-          wx.removeStorageSync('token')
-          wx.removeStorageSync('user')
-          wx.reLaunch({
-            url: '/pages/login/login'
-          })
-          reject(res.data)
-        } else {
-          logger.warning('API 响应异常', {
-            url: options.url,
-            method: options.method,
-            statusCode: res.statusCode
-          })
-          reject(res.data)
+          handleUnauthorized()
+          reject(new Error('登录已过期，请重新登录'))
+          return
         }
+
+        const message = errorMessage(res.data, `请求失败（${res.statusCode}）`)
+        logger.warning('API 响应异常', {
+          url: options.url,
+          method: options.method,
+          statusCode: res.statusCode,
+          message
+        })
+        wx.showToast({
+          title: message,
+          icon: 'none'
+        })
+        reject(new Error(message))
       },
       fail: (err) => {
+        const message = err.errMsg || '网络错误'
         logger.error('API 请求失败', {
           url: options.url,
           method: options.method,
-          errMsg: err.errMsg || '网络错误'
+          errMsg: message
         })
         wx.showToast({
-          title: err.errMsg || '网络错误',
+          title: message,
           icon: 'none'
         })
-        reject(err)
+        reject(new Error(message))
       }
     })
   })
 }
 
-// GET 请求
 function get(url, data) {
   return request({ url, method: 'GET', data })
 }
 
-// POST 请求
 function post(url, data) {
   return request({ url, method: 'POST', data })
 }
 
-// PUT 请求
 function put(url, data) {
   return request({ url, method: 'PUT', data })
 }
 
-// DELETE 请求
 function del(url, data) {
   return request({ url, method: 'DELETE', data })
 }
 
-// 文件上传
 function uploadFile(url, filePath, formData = {}) {
-  const token = getToken()
-  
   return new Promise((resolve, reject) => {
     wx.uploadFile({
       url: config.API_BASE_URL + url,
       filePath: filePath,
       name: 'file',
       formData: formData,
-      header: {
-        'Authorization': token ? `Bearer ${token}` : ''
-      },
+      header: buildHeader(null),
       success: (res) => {
-        const data = JSON.parse(res.data)
+        saveSessionCookie(res.header)
+
+        let data
+        try {
+          data = JSON.parse(res.data)
+        } catch (error) {
+          reject(new Error('响应解析失败'))
+          return
+        }
+
         if (data.code === 0) {
           resolve(data)
         } else {
-          reject(data)
+          reject(new Error(errorMessage(data, '上传失败')))
         }
       },
       fail: (err) => {
-        reject(err)
+        reject(new Error(err.errMsg || '网络错误'))
       }
     })
   })

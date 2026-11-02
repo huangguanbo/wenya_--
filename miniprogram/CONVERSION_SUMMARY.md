@@ -15,7 +15,7 @@
 
 ### 工具模块 (utils/)
 - `utils/api.js` - API 请求封装（支持 JWT 认证）
-- `utils/auth.js` - 认证工具（微信登录、手机号登录）
+- `utils/auth.js` - 认证工具（微信登录）
 - `utils/config.js` - 配置常量
 - `utils/util.js` - 通用工具函数（日期格式化、验证等）
 
@@ -55,25 +55,16 @@
 - 退出登录
 
 #### 6. 登录页 (login)
-- 微信一键登录
-- 手机号验证码登录
-- 注册入口
+- 微信一键登录（无需注册）
 - 用户协议链接
 
-#### 7. 注册页 (register)
-- 微信授权获取信息
-- 填写用户名、昵称
-- 选择年级
-- 监护人手机号验证
-- 监护人协议同意
-
-#### 8. 作文详情页 (writing-detail)
+#### 7. 作文详情页 (writing-detail)
 - 作文内容展示
 - 七维度评分详情
 - AI 评语和修改建议
 - 分享功能
 
-#### 9. 设置页 (settings)
+#### 8. 设置页 (settings)
 - 个人资料编辑
 - 隐私政策
 - 用户协议
@@ -90,9 +81,7 @@
 
 | 功能模块 | Web 版 | 小程序版 | 状态 |
 |---------|-------|---------|------|
-| 微信登录 | ❌ | ✅ | 新增 |
-| 手机号登录 | ✅ | ✅ | 已适配 |
-| 用户注册 | ✅ | ✅ | 已适配（含监护人验证） |
+| 微信登录 | ❌ | ✅ | 新增（唯一登录方式，无需注册） |
 | 写作功能 | ✅ | ✅ | 已适配 |
 | AI 对话 | ✅ | ✅ | 已适配（底部弹出式） |
 | 自动保存 | ✅ | ✅ | 已适配 |
@@ -132,7 +121,6 @@
 #### b. 后端 API 适配
 参考 `miniprogram/API_ADAPTER.md` 新增以下 API：
 - `POST /api/auth/wx-login` - 微信登录
-- `POST /api/auth/send-code` - 发送验证码
 - `GET /api/ranking/my-rank` - 获取我的排名
 - `GET /api/stats` - 获取统计数据
 - `POST /api/community/works/<id>/like` - 点赞
@@ -180,7 +168,7 @@ git clone https://github.com/ecomfe/echarts-for-weixin.git
 编辑 `utils/config.js`：
 ```javascript
 module.exports = {
-  API_BASE_URL: 'http://192.168.1.100:5000/api',  // 开发环境
+  API_BASE_URL: 'http://192.168.1.100:5001/api',  // 开发环境
   // API_BASE_URL: 'https://api.wenya.com/api',   // 生产环境
   TIMEOUT: 30000,
   DEBUG: true
@@ -228,7 +216,6 @@ miniprogram/
 │   ├── community/                  # 社区
 │   ├── profile/                    # 个人中心
 │   ├── login/                      # 登录
-│   ├── register/                   # 注册
 │   ├── writing-detail/             # 作文详情
 │   └── settings/                   # 设置
 └── images/                         # 图片资源（需准备）
@@ -244,8 +231,7 @@ miniprogram/
 - 自动滚动到最新消息
 
 ### 2. 优雅的登录流程
-- 微信一键登录优先
-- 手机号登录备选
+- 微信一键登录
 - 自动检测登录状态
 - Token 无感刷新
 
@@ -278,7 +264,7 @@ miniprogram/
 - 添加举报功能
 
 ### 4. 未成年人保护
-- 监护人验证必须
+- 监护人同意提示
 - 内容分级展示
 - 防沉迷机制
 - 隐私保护

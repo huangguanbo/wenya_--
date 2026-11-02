@@ -107,58 +107,7 @@ def wx_login():
     })
 ```
 
-### 2. 发送验证码
-
-**端点**: `POST /api/auth/send-code`
-
-**请求体**:
-```json
-{
-  "phone": "13800138000"
-}
-```
-
-**响应**:
-```json
-{
-  "code": 0,
-  "data": {
-    "message": "验证码已发送"
-  }
-}
-```
-
-**后端实现示例**:
-
-```python
-@auth_bp.route('/send-code', methods=['POST'])
-def send_verification_code():
-    """发送验证码（短信或微信模板消息）"""
-    data = request.get_json()
-    phone = data.get('phone')
-    
-    if not phone or not re.match(r'^1[3-9]\d{9}$', phone):
-        return jsonify({'error': '手机号格式错误'}), 400
-    
-    # 生成 6 位验证码
-    code = ''.join(random.choices('0123456789', k=6))
-    
-    # 存储验证码到 Redis（5 分钟有效期）
-    redis_client.setex(f'verify_code:{phone}', 300, code)
-    
-    # 发送短信（使用阿里云/腾讯云短信服务）
-    # send_sms(phone, code)
-    
-    # 或发送微信模板消息
-    # send_wechat_template(phone, code)
-    
-    return jsonify({
-        'code': 0,
-        'data': {'message': '验证码已发送'}
-    })
-```
-
-### 3. 获取我的排名
+### 2. 获取我的排名
 
 **端点**: `GET /api/ranking/my-rank`
 
@@ -175,7 +124,7 @@ def send_verification_code():
 }
 ```
 
-### 4. 获取统计数据
+### 3. 获取统计数据
 
 **端点**: `GET /api/stats`
 
@@ -309,18 +258,6 @@ def unlike_work(id):
 # 微信小程序配置
 WECHAT_APPID=wx1234567890abcdef
 WECHAT_SECRET=your-wechat-secret-key
-
-# 短信服务配置（阿里云）
-ALIYUN_SMS_ACCESS_KEY=your-access-key
-ALIYUN_SMS_ACCESS_SECRET=your-access-secret
-ALIYUN_SMS_SIGN_NAME=文芽平台
-ALIYUN_SMS_TEMPLATE_CODE=SMS_123456789
-
-# 或腾讯云短信
-TENCENT_SMS_SECRET_ID=your-secret-id
-TENCENT_SMS_SECRET_KEY=your-secret-key
-TENCENT_SMS_APP_ID=1400000000
-TENCENT_SMS_TEMPLATE_ID=123456
 ```
 
 ## 数据库变更
@@ -448,29 +385,20 @@ def test_wx_login():
     assert data['code'] == 0
     assert 'token' in data['data']
     assert 'user' in data['data']
-
-def test_send_code():
-    """测试发送验证码"""
-    response = client.post('/api/auth/send-code', json={
-        'phone': '13800138000'
-    })
-    assert response.status_code == 200
 ```
 
 ### 2. 小程序真机测试
 
 1. 在微信开发者工具中配置后端地址
 2. 使用真机调试模式
-3. 测试登录、注册、写作、评分等核心流程
+3. 测试微信登录、写作、评分等核心流程
 4. 检查网络请求和错误处理
 
 ## 上线前检查清单
 
 - [ ] 配置微信小程序 AppID 和 Secret
-- [ ] 配置短信服务
 - [ ] 配置服务器域名（微信公众平台）
 - [ ] 测试微信登录流程
-- [ ] 测试手机号验证登录
 - [ ] 测试内容安全检测
 - [ ] 添加日志监控
 - [ ] 准备隐私政策和用户协议
@@ -487,9 +415,6 @@ A: 检查微信公众平台是否配置了正确的服务器域名。
 
 ### Q: 如何获取微信 access_token？
 A: 使用 AppID 和 Secret 调用 `https://api.weixin.qq.com/cgi-bin/token` 接口。
-
-### Q: 短信服务用什么提供商？
-A: 推荐使用阿里云或腾讯云短信服务，价格和稳定性都不错。
 
 ## 参考资料
 

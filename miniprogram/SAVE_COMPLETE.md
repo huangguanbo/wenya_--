@@ -32,7 +32,7 @@
 
 ```
 ✅ utils/api.js            - API 请求封装（已集成日志）
-✅ utils/auth.js           - 认证工具（微信登录 + 手机号）
+✅ utils/auth.js           - 认证工具（微信登录）
 ✅ utils/config.js         - 配置常量
 ✅ utils/util.js           - 通用工具函数
 ✅ utils/logger.js         - 运行日志工具（新增）
@@ -46,8 +46,7 @@
 ✅ pages/ranking/          - 排行榜（综合榜 + 进步榜 + 维度榜）
 ✅ pages/community/        - 社区（作品列表 + 点赞）
 ✅ pages/profile/          - 个人中心（用户信息 + 设置）
-✅ pages/login/            - 登录页（微信登录 + 手机号登录）
-✅ pages/register/         - 注册页（监护人验证）
+✅ pages/login/            - 登录页（微信一键登录）
 ✅ pages/writing-detail/   - 作文详情（评分详情 + AI 评语）
 ✅ pages/settings/         - 设置页（隐私政策 + 用户协议）
 ✅ pages/logs/             - 运行日志（新增，仅开发模式可见）
@@ -105,9 +104,7 @@ python3 generate-icons.py
 ### 已实现的功能
 
 1. **用户认证**
-   - ✅ 微信一键登录
-   - ✅ 手机号验证码登录
-   - ✅ 监护人验证注册
+   - ✅ 微信一键登录（无需注册）
    - ✅ JWT Token 认证
 
 2. **写作功能**
@@ -142,7 +139,6 @@ python3 generate-icons.py
    - ✅ 仅开发模式可见
 
 7. **合规保护**
-   - ✅ 监护人验证
    - ✅ 隐私政策
    - ✅ 用户协议
    - ✅ 防沉迷（需后端配合）
@@ -175,7 +171,7 @@ python3 generate-icons.py
 ✅ TabBar 正常显示（5 个标签）
 ✅ 首页数据展示
 ✅ 写作页编辑器
-✅ 登录/注册流程
+✅ 微信登录流程
 ✅ 运行日志入口（开发模式）
 ```
 
@@ -190,7 +186,7 @@ python3 generate-icons.py
 ```javascript
 module.exports = {
   // 开发环境（本地）
-  API_BASE_URL: 'http://192.168.1.100:5000/api',
+  API_BASE_URL: 'http://192.168.1.100:5001/api',
   
   // 生产环境
   // API_BASE_URL: 'https://api.wenya.com/api',
@@ -261,7 +257,6 @@ A: 运行 `python3 verify-files.py` 查看缺失的文件。
 
 1. **后端 API 适配**
    - 新增微信登录接口
-   - 新增发送验证码接口
    - 新增点赞/取消点赞接口
 
 2. **微信公众平台配置**

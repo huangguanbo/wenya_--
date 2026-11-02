@@ -6,7 +6,6 @@
     "pages/community/community",
     "pages/profile/profile",
     "pages/login/login",
-    "pages/register/register",
     "pages/writing-detail/writing-detail",
     "pages/settings/settings",
     "pages/logs/logs"

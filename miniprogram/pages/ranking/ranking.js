@@ -6,16 +6,15 @@ Page({
   data: {
     currentTab: 'overall',
     dimensions: [
-      { label: '任务完成', value: 'task_completion' },
       { label: '主题立意', value: 'theme' },
       { label: '内容充实', value: 'content' },
       { label: '结构逻辑', value: 'structure' },
       { label: '语言表达', value: 'language' },
-      { label: '文体规范', value: 'style' },
-      { label: '思维深度', value: 'thinking' }
+      { label: '思维深度', value: 'creativity' }
     ],
     dimensionIndex: 0,
     rankingList: [],
+    restRankings: [],
     myRank: null,
     loading: false
   },
@@ -25,53 +24,62 @@ Page({
   },
 
   onShow() {
-    // 每次显示时刷新数据
     this.loadRanking()
   },
 
   async loadRanking() {
+    if (!app.globalData.token) return
+
     this.setData({ loading: true })
-    
+
     try {
       let endpoint = '/ranking/overall'
-      
+      let scoreField = 'average_score'
+
       if (this.data.currentTab === 'progress') {
         endpoint = '/ranking/progress'
+        scoreField = 'progress_score'
       } else if (this.data.currentTab === 'dimension') {
-        const dim = this.data.dimensions[this.data.dimensionIndex].value
-        endpoint = `/ranking/dimension/${dim}`
+        const dimension = this.data.dimensions[this.data.dimensionIndex].value
+        endpoint = `/ranking/dimension/${dimension}`
+        scoreField = 'dimension_score'
       }
-      
+
       const res = await api.get(endpoint)
-      const data = res.data || []
-      
+      const data = res.data || {}
+      const grade = data.grade || (app.globalData.user && app.globalData.user.grade)
+
+      const rankingList = (data.rankings || []).map(item => ({
+        ...item,
+        avatar: item.avatar_url || '/images/default-avatar.png',
+        grade,
+        score: item[scoreField] || 0
+      }))
+
       this.setData({
-        rankingList: data.map((item, index) => ({
-          ...item,
-          rank: index + 1,
-          avatar: item.avatar || '/images/default-avatar.png',
-          score: currentTab === 'progress' ? item.progress_score : item.score
-        }))
+        rankingList,
+        restRankings: rankingList.slice(3),
+        myRank: this.formatMyRank(data.user_rank, scoreField)
       })
-      
-      // 加载我的排名
-      this.loadMyRank()
     } catch (error) {
       console.error('加载排行榜失败:', error)
-      util.showError('加载失败')
+      this.setData({
+        rankingList: [],
+        restRankings: [],
+        myRank: null
+      })
     } finally {
       this.setData({ loading: false })
     }
   },
 
-  async loadMyRank() {
-    try {
-      const res = await api.get('/ranking/my-rank')
-      this.setData({
-        myRank: res.data
-      })
-    } catch (error) {
-      console.error('加载我的排名失败:', error)
+  formatMyRank(userRank, scoreField) {
+    if (!userRank) return null
+
+    return {
+      rank: userRank.rank_position,
+      score: userRank[scoreField] || userRank.average_score || 0,
+      percentile: userRank.percentile || 0
     }
   },
 
@@ -80,6 +88,7 @@ Page({
     this.setData({
       currentTab: type,
       rankingList: [],
+      restRankings: [],
       myRank: null
     }, () => {
       this.loadRanking()
@@ -87,17 +96,15 @@ Page({
   },
 
   onDimensionChange(e) {
-    const index = e.detail.value
     this.setData({
-      dimensionIndex: index
+      dimensionIndex: Number(e.detail.value)
     }, () => {
       this.loadRanking()
     })
   },
 
-  onPullDownRefresh() {
-    this.loadRanking().then(() => {
-      wx.stopPullDownRefresh()
-    })
+  async onPullDownRefresh() {
+    await this.loadRanking()
+    wx.stopPullDownRefresh()
   }
 })

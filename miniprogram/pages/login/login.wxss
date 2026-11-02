@@ -40,7 +40,7 @@
 
 /* 微信登录按钮 */
 .wechat-login-section {
-  margin-bottom: 32rpx;
+  margin-bottom: 24rpx;
 }
 
 .wechat-btn {
@@ -65,107 +65,12 @@
   margin-right: 12rpx;
 }
 
-/* 分割线 */
-.divider {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 32rpx 0;
-}
-
-.divider::before,
-.divider::after {
-  content: '';
-  flex: 1;
-  height: 1rpx;
-  background-color: #e5e7eb;
-}
-
-.divider text {
-  padding: 0 20rpx;
-  color: #9ca3af;
-  font-size: 26rpx;
-}
-
-/* 表单 */
-.phone-login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 24rpx;
-  margin-bottom: 32rpx;
-}
-
-.form-item {
-  background-color: #f3f4f6;
-  border-radius: 12rpx;
-  padding: 0 24rpx;
-}
-
-.input {
-  height: 88rpx;
-  font-size: 28rpx;
-  width: 100%;
-}
-
-.code-input {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.code-input .input {
-  flex: 1;
-  background-color: transparent;
-}
-
-.code-btn {
-  background-color: #f0fdf4;
-  color: #16a34a;
-  border: none;
-  border-radius: 8rpx;
-  padding: 16rpx 24rpx;
-  font-size: 24rpx;
-  margin-left: 16rpx;
-}
-
-.code-btn::after {
-  border: none;
-}
-
-.code-btn.disabled {
-  background-color: #f3f4f6;
-  color: #9ca3af;
-}
-
-/* 登录按钮 */
-.btn-primary.full-width {
-  width: 100%;
-  padding: 28rpx 0;
-  font-size: 30rpx;
-  font-weight: 500;
-  border: none;
-  border-radius: 12rpx;
-  margin-top: 12rpx;
-}
-
-.btn-primary.full-width::after {
-  border: none;
-}
-
-.btn-primary.full-width[disabled] {
-  background-color: #9ca3af;
-}
-
-/* 注册链接 */
-.register-link {
+.wechat-tip {
+  display: block;
   text-align: center;
-  font-size: 26rpx;
-  color: #6b7280;
-}
-
-.link {
-  color: #16a34a;
-  margin-left: 8rpx;
+  margin-top: 20rpx;
+  font-size: 24rpx;
+  color: #9ca3af;
 }
 
 /* 用户协议 */

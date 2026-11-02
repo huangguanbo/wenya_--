@@ -4,71 +4,62 @@
 const api = require('./api')
 
 /**
- * 微信登录 + 后端注册/登录
+ * 微信一键登录
  */
 async function login() {
-  return new Promise(async (resolve, reject) => {
-    try {
-      // 1. 微信登录获取 code
-      const loginRes = await wxPromise('login')
-      const code = loginRes.code
-      
-      // 2. 发送到后端换取 token
-      const res = await api.post('/auth/wx-login', { code })
-      
-      // 3. 存储 token 和用户信息
-      if (res.data) {
-        wx.setStorageSync('token', res.data.token)
-        wx.setStorageSync('user', res.data.user)
-        resolve(res.data)
-      } else {
-        reject(res)
-      }
-    } catch (error) {
-      reject(error)
-    }
-  })
+  let code
+
+  try {
+    const res = await wxPromise('login')
+    code = res.code
+  } catch (error) {
+    throw new Error(error.errMsg || '微信登录失败')
+  }
+
+  if (!code) {
+    throw new Error('微信登录失败')
+  }
+
+  const res = await api.post('/auth/wx-login', { code })
+  const data = res.data || {}
+
+  if (!data.token || !data.user) {
+    throw new Error(res.message || '登录失败')
+  }
+
+  wx.setStorageSync('token', data.token)
+  wx.setStorageSync('user', data.user)
+
+  return data
 }
 
 /**
- * 手机号验证登录
+ * 获取当前用户信息
  */
-async function loginWithPhone(phone, verificationCode) {
-  try {
-    const res = await api.post('/auth/login', {
-      phone: phone,
-      verification_code: verificationCode
-    })
-    
-    if (res.data) {
-      wx.setStorageSync('token', res.data.token)
-      wx.setStorageSync('user', res.data.user)
-      return res.data
-    }
-    throw res
-  } catch (error) {
-    throw error
-  }
-}
+async function fetchCurrentUser() {
+  const res = await api.get('/auth/me')
+  const user = (res.data && res.data.user) || null
 
-/**
- * 注册（需监护人验证）
- */
-async function register(userData) {
-  try {
-    const res = await api.post('/auth/register', userData)
-    return res.data
-  } catch (error) {
-    throw error
+  if (user) {
+    wx.setStorageSync('user', user)
   }
+
+  return user
 }
 
 /**
  * 退出登录
  */
-function logout() {
+async function logout() {
+  try {
+    await api.post('/auth/logout')
+  } catch (error) {
+    // 本地登录态仍需清理
+  }
+
   wx.removeStorageSync('token')
   wx.removeStorageSync('user')
+  wx.removeStorageSync('wenya_session_cookie')
   wx.reLaunch({
     url: '/pages/login/login'
   })
@@ -102,24 +93,11 @@ function wxPromise(apiName, options = {}) {
   })
 }
 
-/**
- * 获取手机号（需用户授权）
- */
-async function getPhoneNumber() {
-  return new Promise((resolve, reject) => {
-    // 在需要时调用 wx.getPhoneNumber
-    // 注意：2023 年后需要用户主动触发按钮
-    reject(new Error('请使用按钮触发获取手机号'))
-  })
-}
-
 module.exports = {
   login,
-  loginWithPhone,
-  register,
   logout,
   checkLogin,
   getCurrentUser,
-  wxPromise,
-  getPhoneNumber
+  fetchCurrentUser,
+  wxPromise
 }

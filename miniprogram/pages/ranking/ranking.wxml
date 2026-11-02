@@ -70,15 +70,15 @@
     <view class="ranking-items">
       <view 
         class="ranking-item"
-        wx:for="{{rankingList.slice(3)}}"
-        wx:key="rank"
+        wx:for="{{restRankings}}"
+        wx:key="user_id"
         data-rank="{{index + 4}}"
       >
         <view class="rank-num">{{index + 4}}</view>
         <view class="user-avatar" style="background-image: url({{item.avatar}})"></view>
         <view class="user-info">
           <text class="user-nickname">{{item.nickname}}</text>
-          <text class="user-grade">{{item.grade}}年级</text>
+          <text class="user-grade" wx:if="{{item.grade}}">{{item.grade}}年级</text>
         </view>
         <view class="user-score">
           <text class="score-value">{{item.score}}</text>

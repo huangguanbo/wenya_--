@@ -60,6 +60,28 @@ function formatRelativeTime(dateStr) {
 }
 
 /**
+ * 统计字数（中文按字，英文按词）
+ */
+function countWords(text) {
+  if (!text) return 0
+
+  const chinese = (text.match(/[\u4e00-\u9fa5]/g) || []).length
+  const english = (text.match(/[a-zA-Z]+/g) || []).length
+
+  return chinese + english
+}
+
+/**
+ * 年级名称
+ */
+function gradeName(grade) {
+  if (!grade) return '未设置'
+  if (grade <= 6) return `小学 ${grade}年级`
+  if (grade <= 9) return `初中 ${grade - 6}年级`
+  return `高中 ${grade - 9}年级`
+}
+
+/**
  * 格式化数字（超过 1 万显示为 1.2 万）
  */
 function formatNumber(num) {
@@ -194,6 +216,8 @@ module.exports = {
   formatDate,
   formatRelativeTime,
   formatNumber,
+  countWords,
+  gradeName,
   debounce,
   throttle,
   deepClone,

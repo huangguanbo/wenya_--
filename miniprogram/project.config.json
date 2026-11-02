@@ -7,7 +7,7 @@
   "setting": {
     "bundle": false,
     "userConfirmedBundleSwitch": false,
-    "urlCheck": true,
+    "urlCheck": false,
     "scopeDataCheck": false,
     "coverView": true,
     "es6": true,
@@ -46,7 +46,7 @@
   },
   "compileType": "mini-program",
   "libVersion": "3.17.3",
-  "appid": "touristappid",
+  "appid": "wx832615be3618a7f9",
   "projectname": "wenya-miniprogram",
   "condition": {},
   "editorSetting": {

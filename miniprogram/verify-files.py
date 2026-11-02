@@ -60,11 +60,6 @@ REQUIRED_FILES = {
         'pages/login/login.wxss',
         'pages/login/login.json',
         
-        'pages/register/register.wxml',
-        'pages/register/register.js',
-        'pages/register/register.wxss',
-        'pages/register/register.json',
-        
         'pages/writing-detail/writing-detail.wxml',
         'pages/writing-detail/writing-detail.js',
         'pages/writing-detail/writing-detail.wxss',

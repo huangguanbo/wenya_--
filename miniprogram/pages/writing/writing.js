@@ -8,6 +8,7 @@ Page({
     content: '',
     wordCount: 0,
     writingId: null,
+    canSubmit: false,
     messages: [],
     inputMessage: '',
     loading: false,
@@ -16,18 +17,26 @@ Page({
     showAiChat: false,
     scrollToView: '',
     quickActions: [
-      { label: '💡 审题指导', value: 'help_understand_prompt', sessionType: 'help_understand_prompt' },
-      { label: '📚 素材启发', value: 'suggest_materials', sessionType: 'suggest_materials' },
-      { label: '✏️ 段落修改', value: 'revise_paragraph', sessionType: 'revise_paragraph' },
-      { label: '📊 评分标准', value: 'explain_scoring', sessionType: 'explain_scoring' }
+      { label: '💡 审题指导', sessionType: 'help_understand_prompt' },
+      { label: '📚 素材启发', sessionType: 'suggest_materials' },
+      { label: '✏️ 段落修改', sessionType: 'revise_paragraph' },
+      { label: '📊 评分标准', sessionType: 'explain_scoring' }
     ]
   },
 
   autoSaveTimer: null,
+  creating: false,
 
   onLoad(options) {
+    if (!app.globalData.token) {
+      wx.reLaunch({
+        url: '/pages/login/login'
+      })
+      return
+    }
+
     if (options.id) {
-      this.setData({ writingId: options.id })
+      this.setData({ writingId: Number(options.id) })
       this.loadWriting(options.id)
     }
   },
@@ -40,31 +49,61 @@ Page({
 
   async loadWriting(id) {
     util.showLoading()
+
     try {
       const res = await api.get(`/writing/${id}`)
-      const data = res.data || {}
-      
+      const writing = res.data && res.data.writing
+
+      if (!writing) {
+        throw new Error('作文不存在')
+      }
+
+      if (writing.status !== 'draft') {
+        wx.redirectTo({
+          url: `/pages/writing-detail/writing-detail?id=${writing.id}`
+        })
+        return
+      }
+
       this.setData({
-        title: data.title || '',
-        content: data.content || '',
-        wordCount: data.word_count || 0
+        title: writing.title || '',
+        content: writing.content || '',
+        wordCount: util.countWords(writing.content),
+        canSubmit: this.checkCanSubmit(writing.title, writing.content, writing.id)
       })
+
+      this.loadChatHistory(id)
     } catch (error) {
       console.error('加载作文失败:', error)
-      util.showError('加载失败')
+      util.showError(error.message || '加载失败')
     } finally {
       util.hideLoading()
     }
   },
 
+  async loadChatHistory(id) {
+    try {
+      const res = await api.get(`/writing/${id}/ai-chat`)
+      this.setData({
+        messages: (res.data && res.data.messages) || []
+      })
+    } catch (error) {
+      console.error('加载对话历史失败:', error)
+    }
+  },
+
+  checkCanSubmit(title, content, writingId) {
+    return !!title.trim() && util.countWords(content) >= 100 && !!writingId
+  },
+
   onTitleInput(e) {
     const title = e.detail.value
-    this.setData({ title })
-    
-    // 自动创建草稿
-    if (!this.data.writingId && (title || this.data.content)) {
-      this.createWriting()
-    }
+    this.setData({
+      title,
+      canSubmit: this.checkCanSubmit(title, this.data.content, this.data.writingId)
+    })
+
+    this.ensureWriting()
     this.scheduleAutoSave()
   },
 
@@ -72,95 +111,104 @@ Page({
     const content = e.detail.value
     this.setData({
       content,
-      wordCount: content.length
+      wordCount: util.countWords(content),
+      canSubmit: this.checkCanSubmit(this.data.title, content, this.data.writingId)
     })
-    
-    // 自动创建草稿
-    if (!this.data.writingId && (title || content)) {
-      this.createWriting()
-    }
+
+    this.ensureWriting()
     this.scheduleAutoSave()
   },
 
-  onInputMessage(e) {
-    this.setData({
-      inputMessage: e.detail.value
-    })
+  async ensureWriting() {
+    if (this.data.writingId || this.creating) return
+
+    const title = this.data.title.trim()
+    const content = this.data.content
+
+    if (!title || !util.countWords(content)) return
+
+    this.creating = true
+
+    try {
+      const res = await api.post('/writing', {
+        title,
+        content
+      })
+
+      const writing = res.data && res.data.writing
+      if (writing) {
+        this.setData({
+          writingId: writing.id,
+          canSubmit: this.checkCanSubmit(title, content, writing.id)
+        })
+      }
+    } catch (error) {
+      console.error('创建作文失败:', error)
+    } finally {
+      this.creating = false
+    }
+  },
+
+  onSaveTap() {
+    this.saveDraft(true)
   },
 
   scheduleAutoSave() {
     if (this.autoSaveTimer) {
       clearTimeout(this.autoSaveTimer)
     }
-    
+
     this.autoSaveTimer = setTimeout(() => {
-      if (this.data.writingId) {
-        this.saveDraft()
-      }
+      this.saveDraft()
     }, 5000)
   },
 
-  async createWriting() {
-    try {
-      const res = await api.post('/writing', {
-        title: this.data.title || '未命名作文',
-        content: this.data.content
-      })
-      
-      this.setData({
-        writingId: res.data.id
-      })
-    } catch (error) {
-      console.error('创建作文失败:', error)
+  async saveDraft(manual = false) {
+    if (!this.data.writingId) {
+      if (manual) {
+        util.showError('请先填写标题和正文')
+      }
+      return
     }
-  },
 
-  async saveDraft() {
-    if (!this.data.writingId) return
-    
+    if (!this.data.content.trim()) {
+      if (manual) {
+        util.showError('正文不能为空')
+      }
+      return
+    }
+
     this.setData({
       saving: true,
       autoSaveStatus: '保存中...'
     })
-    
+
     try {
       await api.post(`/writing/${this.data.writingId}/draft`, {
         title: this.data.title,
         content: this.data.content
       })
-      
-      this.setData({
-        autoSaveStatus: '已保存'
-      })
-      
-      setTimeout(() => {
-        this.setData({
-          autoSaveStatus: ''
-        })
-      }, 2000)
+
+      this.setData({ autoSaveStatus: '已保存' })
     } catch (error) {
-      this.setData({
-        autoSaveStatus: '保存失败'
-      })
-      
-      setTimeout(() => {
-        this.setData({
-          autoSaveStatus: ''
-        })
-      }, 2000)
+      this.setData({ autoSaveStatus: '保存失败' })
     } finally {
-      this.setData({
-        saving: false
-      })
+      this.setData({ saving: false })
+      setTimeout(() => {
+        this.setData({ autoSaveStatus: '' })
+      }, 2000)
     }
   },
 
   submitWriting() {
-    if (!this.data.canSubmit) return
-    
+    if (!this.data.canSubmit) {
+      util.showError(`至少 100 字才能提交评分`)
+      return
+    }
+
     wx.showModal({
       title: '提交评分',
-      content: '确定要提交作文进行评分吗？',
+      content: '确定要提交作文进行评分吗？提交后不可修改。',
       success: async (res) => {
         if (res.confirm) {
           await this.doSubmit()
@@ -171,26 +219,27 @@ Page({
 
   async doSubmit() {
     util.showLoading('提交中...')
-    
+
     try {
-      await api.post(`/writing/${this.data.writingId}/submit`, {
+      await api.post(`/writing/${this.data.writingId}/draft`, {
         title: this.data.title,
         content: this.data.content
       })
-      
+      const res = await api.post(`/writing/${this.data.writingId}/submit`)
+      const message = res.message || '评分完成'
+
       util.hideLoading()
       wx.showToast({
-        title: '已提交评分',
-        icon: 'success'
+        title: message,
+        icon: message.indexOf('模拟') >= 0 ? 'none' : 'success'
       })
-      
-      // 跳转到详情页
-      wx.navigateTo({
+
+      wx.redirectTo({
         url: `/pages/writing-detail/writing-detail?id=${this.data.writingId}`
       })
     } catch (error) {
       util.hideLoading()
-      util.showError('提交失败，请稍后重试')
+      util.showError(error.message || '提交失败，请稍后重试')
     }
   },
 
@@ -200,15 +249,25 @@ Page({
     })
   },
 
-  async sendMessage() {
-    if (!this.data.inputMessage.trim() || this.data.loading || !this.data.writingId) {
+  onInputMessage(e) {
+    this.setData({
+      inputMessage: e.detail.value
+    })
+  },
+
+  async sendMessage(text, sessionType = 'writing_guidance') {
+    const raw = typeof text === 'string' ? text : this.data.inputMessage
+    const message = raw.trim()
+
+    if (!message || this.data.loading) return
+
+    if (!this.data.writingId) {
+      util.showError('请先填写标题和正文')
       return
     }
 
-    const message = this.data.inputMessage.trim()
-    const messages = this.data.messages
-    messages.push({ role: 'user', content: message })
-    
+    const messages = this.data.messages.concat([{ role: 'user', content: message }])
+
     this.setData({
       messages,
       inputMessage: '',
@@ -218,37 +277,28 @@ Page({
 
     try {
       const res = await api.post(`/writing/${this.data.writingId}/ai-chat`, {
-        message: message,
-        session_type: 'writing_guidance'
+        message,
+        session_type: sessionType
       })
-      
-      messages.push({ role: 'assistant', content: res.data.response })
-      
-      this.setData({
-        messages,
-        loading: false,
-        scrollToView: `msg-${messages.length - 1}`
-      })
+
+      const reply = (res.data && res.data.response) || '抱歉，我暂时无法回答。'
+      this.appendMessage({ role: 'assistant', content: reply })
     } catch (error) {
-      messages.push({ role: 'assistant', content: 'AI 教练暂时不可用，请稍后再试。' })
-      
-      this.setData({
-        messages,
-        loading: false,
-        scrollToView: `msg-${messages.length - 1}`
-      })
+      this.appendMessage({ role: 'assistant', content: error.message || 'AI 教练暂时不可用，请稍后再试。' })
     }
   },
 
-  sendQuickAction(e) {
-    const type = e.currentTarget.dataset.type
+  appendMessage(message) {
+    const messages = this.data.messages.concat([message])
     this.setData({
-      inputMessage: type.label.replace(/^[^\s]+\s/, '')
+      messages,
+      loading: false,
+      scrollToView: `msg-${messages.length - 1}`
     })
-    this.sendMessage(type.sessionType)
   },
 
-  get canSubmit() {
-    return this.data.title.trim() && this.data.content.length >= 100 && this.data.writingId
+  sendQuickAction(e) {
+    const action = e.currentTarget.dataset.type
+    this.sendMessage(action.label.replace(/^[^\s]+\s/, ''), action.sessionType)
   }
 })

@@ -32,7 +32,7 @@
     <view class="action-buttons">
       <button 
         class="btn-secondary" 
-        bindtap="saveDraft"
+        bindtap="onSaveTap"
         disabled="{{saving || !writingId}}"
       >
         {{saving ? '保存中...' : '保存草稿'}}
@@ -108,7 +108,7 @@
       <button 
         class="send-btn" 
         bindtap="sendMessage"
-        disabled="{{loading || !inputMessage.trim() || !writingId}}"
+        disabled="{{loading || !writingId}}"
       >
         发送
       </button>

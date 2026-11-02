@@ -5,18 +5,12 @@ const util = require('../../utils/util')
 Page({
   data: {
     gradeOptions: [
-      { label: '全部年级', value: 'all' },
+      { label: '全部年级', value: '' },
       { label: '小学', value: 'elementary' },
       { label: '初中', value: 'middle' },
       { label: '高中', value: 'high' }
     ],
-    sortOptions: [
-      { label: '最新发布', value: 'latest' },
-      { label: '最多点赞', value: 'likes' },
-      { label: '最高分', value: 'score' }
-    ],
     gradeIndex: 0,
-    sortIndex: 0,
     works: [],
     page: 1,
     perPage: 10,
@@ -29,10 +23,10 @@ Page({
   },
 
   onShow() {
-    // 刷新列表
     this.setData({
       page: 1,
-      works: []
+      works: [],
+      hasMore: true
     }, () => {
       this.loadWorks()
     })
@@ -40,33 +34,37 @@ Page({
 
   async loadWorks() {
     if (this.data.loading) return
-    
+
     this.setData({ loading: true })
-    
+
     try {
-      const grade = this.data.gradeOptions[this.data.gradeIndex].value
-      const sort = this.data.sortOptions[this.data.sortIndex].value
-      
+      const schoolStage = this.data.gradeOptions[this.data.gradeIndex].value
       const res = await api.get('/community/works', {
         page: this.data.page,
         per_page: this.data.perPage,
-        grade: grade === 'all' ? undefined : grade,
-        sort: sort
+        school_stage: schoolStage || undefined
       })
-      
+
       const newWorks = (res.data || []).map(work => ({
         ...work,
-        created_at: util.formatRelativeTime(work.created_at),
+        author_name: (work.author && work.author.nickname) || '匿名同学',
+        author_avatar: (work.author && work.author.avatar_url) || '/images/default-avatar.png',
+        grade_name: work.author_grade_text || '',
+        created_at: util.formatRelativeTime(work.published_at || work.created_at),
         is_liked: work.is_liked || false
       }))
-      
+
+      const pagination = res.pagination || {}
+
       this.setData({
-        works: this.data.page === 1 ? newWorks : [...this.data.works, ...newWorks],
-        hasMore: newWorks.length === this.data.perPage,
-        loading: false
+        works: this.data.page === 1 ? newWorks : this.data.works.concat(newWorks),
+        hasMore: pagination.has_next !== undefined
+          ? pagination.has_next
+          : newWorks.length === this.data.perPage
       })
     } catch (error) {
       console.error('加载社区作品失败:', error)
+    } finally {
       this.setData({ loading: false })
     }
   },
@@ -83,52 +81,41 @@ Page({
 
   onGradeChange(e) {
     this.setData({
-      gradeIndex: e.detail.value,
+      gradeIndex: Number(e.detail.value),
       page: 1,
-      works: []
-    }, () => {
-      this.loadWorks()
-    })
-  },
-
-  onSortChange(e) {
-    this.setData({
-      sortIndex: e.detail.value,
-      page: 1,
-      works: []
+      works: [],
+      hasMore: true
     }, () => {
       this.loadWorks()
     })
   },
 
   async toggleLike(e) {
-    const id = e.currentTarget.dataset.id
-    const work = this.data.works.find(w => w.id === id)
-    
-    if (!work) return
-    
-    try {
-      const endpoint = work.is_liked 
-        ? `/community/works/${id}/unlike`
-        : `/community/works/${id}/like`
-      
-      await api.post(endpoint)
-      
-      // 更新本地状态
-      const works = this.data.works.map(w => {
-        if (w.id === id) {
-          return {
-            ...w,
-            is_liked: !w.is_liked,
-            like_count: w.is_liked ? w.like_count - 1 : w.like_count + 1
-          }
-        }
-        return w
+    if (!app.globalData.token) {
+      wx.navigateTo({
+        url: '/pages/login/login'
       })
-      
-      this.setData({ works })
+      return
+    }
+
+    const id = e.currentTarget.dataset.id
+
+    try {
+      const res = await api.post(`/community/works/${id}/like`)
+      const data = res.data || {}
+
+      this.setData({
+        works: this.data.works.map(work => {
+          if (work.id !== id) return work
+          return {
+            ...work,
+            is_liked: data.is_liked,
+            like_count: data.like_count
+          }
+        })
+      })
     } catch (error) {
-      util.showError('操作失败')
+      util.showError(error.message || '操作失败')
     }
   },
 

@@ -1,9 +1,10 @@
 module.exports = {
   // API 基础地址 - 生产环境请修改为实际域名
-  API_BASE_URL: 'https://your-backend.com/api',
-  
-  // 开发环境可使用本地 IP
-  // API_BASE_URL: 'http://192.168.1.100:5000/api',
+  // API_BASE_URL: 'https://your-backend.com/api',
+
+  API_BASE_URL: 'http://localhost:5001/api',
+
+  // API_BASE_URL: 'http://192.168.1.100:5001/api',
   
   // 超时时间（毫秒）
   TIMEOUT: 30000,

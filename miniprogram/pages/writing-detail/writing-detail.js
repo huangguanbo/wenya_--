@@ -2,6 +2,16 @@ const app = getApp()
 const api = require('../../utils/api')
 const util = require('../../utils/util')
 
+const DIMENSIONS = [
+  { key: 'task_score', name: '任务完成' },
+  { key: 'theme_score', name: '主题立意' },
+  { key: 'content_score', name: '内容充实' },
+  { key: 'structure_score', name: '结构逻辑' },
+  { key: 'language_score', name: '语言表达' },
+  { key: 'genre_score', name: '文体规范' },
+  { key: 'thinking_score', name: '思维深度' }
+]
+
 Page({
   data: {
     work: {},
@@ -10,59 +20,50 @@ Page({
   },
 
   onLoad(options) {
-    this.setData({
-      isCommunity: options.type === 'community'
-    })
-    
-    if (options.id) {
-      this.loadWork(options.id)
+    const isCommunity = options.type === 'community'
+    this.setData({ isCommunity })
+
+    if (!options.id) {
+      util.showError('缺少作品 ID')
+      return
     }
+
+    this.loadWork(options.id)
   },
 
   async loadWork(id) {
     util.showLoading()
-    
+
     try {
-      const endpoint = this.data.isCommunity 
+      const endpoint = this.data.isCommunity
         ? `/community/works/${id}`
         : `/writing/${id}`
-      
+
       const res = await api.get(endpoint)
-      const work = res.data || {}
-      
-      // 处理评分维度
-      const dimensions = []
-      const scoreDetails = work.score_details || {}
-      
-      const dimensionMap = {
-        'task_completion': '任务完成',
-        'theme': '主题立意',
-        'content': '内容充实',
-        'structure': '结构逻辑',
-        'language': '语言表达',
-        'style': '文体规范',
-        'thinking': '思维深度'
-      }
-      
-      Object.keys(dimensionMap).forEach(key => {
-        const score = scoreDetails[key] || 0
-        dimensions.push({
-          name: dimensionMap[key],
+      const work = (res.data && (res.data.work || res.data.writing)) || {}
+      const scores = work.scores || work.dimension_scores || {}
+
+      const dimensions = DIMENSIONS.map(item => {
+        const score = scores[item.key] || 0
+        return {
+          name: item.name,
           score: score.toFixed(1),
-          percent: (score / 100) * 100
-        })
+          percent: score
+        }
       })
-      
+
       this.setData({
         work: {
           ...work,
-          created_at: util.formatDate(work.created_at, 'YYYY-MM-DD HH:mm')
+          ai_comment: scores.ai_comment || '',
+          suggestions: scores.ai_suggestions || [],
+          created_at: util.formatDate(work.published_at || work.created_at, 'full')
         },
         dimensions
       })
     } catch (error) {
-      console.error('加载作文详情失败:', error)
-      util.showError('加载失败')
+      console.error('加载作品详情失败:', error)
+      util.showError(error.message || '加载失败')
     } finally {
       util.hideLoading()
     }
@@ -74,18 +75,17 @@ Page({
     })
   },
 
-  async shareWork() {
+  shareWork() {
     if (!this.data.work.overall_score) {
       util.showError('请先提交评分后再分享')
       return
     }
-    
-    // 生成分享海报或小程序卡片
+
     wx.showShareMenu({
       withShareTicket: true,
       menus: ['shareAppMessage', 'shareTimeline']
     })
-    
+
     util.showSuccess('点击右上角分享')
   },
 

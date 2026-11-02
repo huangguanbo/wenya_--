@@ -14,76 +14,88 @@ Page({
     },
     icpNumber: '',
     algorithmNumber: '',
-    isDev: false  // 是否开发模式（显示日志入口）
+    isDev: false
   },
 
   onLoad() {
-    // 判断是否开发模式（开发者或管理员可见日志入口）
-    const isDev = config.DEBUG || this.checkIsDeveloper()
-    this.setData({ isDev })
-    
+    this.setData({ isDev: config.DEBUG })
     this.loadUserData()
   },
 
   onShow() {
-    // 每次显示时刷新数据
     if (app.globalData.token) {
       this.loadUserData()
     }
   },
 
-  /**
-   * 检查是否为开发者/管理员
-   * 可根据实际角色判断逻辑修改
-   */
-  checkIsDeveloper() {
-    const user = app.globalData.user
-    if (!user) return false
-    
-    // 可配置：根据用户角色判断
-    // return user.role === 'admin' || user.role === 'developer'
-    
-    // 临时：所有用户都可见（上线前建议移除）
-    return config.DEBUG
+  async loadUserData() {
+    await Promise.all([
+      this.loadProfile(),
+      this.loadStats(),
+      this.loadCompliance()
+    ])
   },
 
-  async loadUserData() {
+  async loadProfile() {
     try {
-      // 获取用户信息
-      const user = app.globalData.user || {}
-      this.setData({ user })
+      const user = await auth.fetchCurrentUser()
+      if (!user) return
 
-      // 获取统计数据
-      try {
-        const res = await api.get('/stats')
-        const data = res.data || {}
-        
-        this.setData({
-          stats: {
-            total_writings: data.total_writings || 0,
-            average_score: (data.average_score || 0).toFixed(1),
-            consecutive_days: data.profile?.consecutive_days || 0
-          }
-        })
-      } catch (error) {
-        console.error('加载统计数据失败:', error)
-      }
-
-      // 获取备案信息
+      app.globalData.user = user
       this.setData({
-        icpNumber: '京 ICP 备 XXXXXXXX 号',
-        algorithmNumber: '算法备案编号'
+        user: {
+          ...user,
+          avatar: user.avatar_url || '/images/default-avatar.png',
+          grade_name: util.gradeName(user.grade)
+        }
       })
     } catch (error) {
-      console.error('加载用户数据失败:', error)
+      console.error('加载用户信息失败:', error)
+    }
+  },
+
+  async loadStats() {
+    try {
+      const res = await api.get('/stats')
+      const data = res.data || {}
+      const profile = data.profile || {}
+
+      this.setData({
+        stats: {
+          total_writings: data.total_writings || 0,
+          average_score: (data.average_score || 0).toFixed(1),
+          consecutive_days: profile.consecutive_days || 0
+        }
+      })
+    } catch (error) {
+      console.error('加载统计数据失败:', error)
+    }
+  },
+
+  async loadCompliance() {
+    try {
+      const res = await api.get('/compliance/info')
+      const data = res.data || {}
+
+      this.setData({
+        icpNumber: data.icp_number || '',
+        algorithmNumber: data.algorithm_number || ''
+      })
+    } catch (error) {
+      console.error('加载合规信息失败:', error)
     }
   },
 
   navToPage(e) {
     const page = e.currentTarget.dataset.page
-    if (page) {
-      wx.navigateTo({ url: page })
+    if (!page) return
+
+    if (page === '/pages/writing-detail/writing-detail') {
+      util.showError('作品列表页暂未开放')
+      return
     }
+
+    wx.navigateTo({ url: page })
   },
 
   goToSettings() {
