@@ -1,4 +1,5 @@
 const logger = require('./utils/logger')
+const auth = require('./utils/auth')
 
 App({
   onLaunch() {
@@ -31,13 +32,21 @@ App({
 
   initLogin() {
     try {
-      const token = wx.getStorageSync('token')
-      const user = wx.getStorageSync('user')
-
-      if (token && user) {
-        this.globalData.token = token
+      const user = auth.getCachedUser()
+      if (user) {
         this.globalData.user = user
       }
+
+      // 复用本地会话；会话失效时静默重新登录，用户无感知
+      auth.ensureSession().then((currentUser) => {
+        if (currentUser) {
+          this.globalData.user = currentUser
+        }
+      }).catch((error) => {
+        logger.error('恢复登录态失败', {
+          error: error.message || error
+        })
+      })
     } catch (error) {
       logger.error('初始化登录状态失败', {
         error: error.message || error
@@ -45,27 +54,23 @@ App({
     }
   },
 
+  isLoggedIn() {
+    return auth.isLoggedIn()
+  },
+
   checkLogin() {
-    try {
-      const token = wx.getStorageSync('token')
-      if (!token) {
-        wx.navigateTo({
-          url: '/pages/login/login'
-        })
-        return false
-      }
-      return true
-    } catch (error) {
-      logger.error('检查登录状态失败', {
-        error: error.message || error
+    if (!auth.isLoggedIn()) {
+      wx.navigateTo({
+        url: '/pages/login/login'
       })
       return false
     }
+    return true
   },
 
   globalData: {
-    token: '',
     user: null,
+    writingIntent: null,
     API_BASE_URL: ''
   }
 })

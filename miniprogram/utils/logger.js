@@ -4,6 +4,7 @@
  * 支持本地存储和自动上报
  */
 const config = require('./config')
+const session = require('./session')
 
 // 日志级别常量
 const LOG_LEVEL = {
@@ -21,7 +22,7 @@ const MAX_LOG_COUNT = 100
 const ENABLE_REPORT = false
 
 // 日志上报地址（可选）
-const REPORT_URL = '/api/log/upload'
+const REPORT_URL = '/log/upload'
 
 /**
  * 获取日志存储
@@ -145,14 +146,11 @@ function warning(message, data = {}) {
  */
 async function reportLog(log) {
   try {
-    const token = wx.getStorageSync('token')
     wx.request({
       url: config.API_BASE_URL + REPORT_URL,
       method: 'POST',
       data: { logs: [log] },
-      header: {
-        'Authorization': token ? `Bearer ${token}` : ''
-      },
+      header: session.buildHeader('application/json'),
       timeout: 5000
     })
   } catch (error) {
@@ -171,14 +169,11 @@ async function reportLogs() {
   if (logs.length === 0) return
   
   try {
-    const token = wx.getStorageSync('token')
     wx.request({
       url: config.API_BASE_URL + REPORT_URL,
       method: 'POST',
       data: { logs },
-      header: {
-        'Authorization': token ? `Bearer ${token}` : ''
-      },
+      header: session.buildHeader('application/json'),
       timeout: 10000,
       success: () => {
         // 上报成功后清空本地存储

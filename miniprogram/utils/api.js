@@ -3,48 +3,10 @@
  */
 const config = require('./config')
 const logger = require('./logger')
-
-const COOKIE_KEY = 'wenya_session_cookie'
-
-function getToken() {
-  return wx.getStorageSync('token') || ''
-}
-
-function getCookie() {
-  return wx.getStorageSync(COOKIE_KEY) || ''
-}
-
-function saveSessionCookie(header) {
-  const raw = header && (header['Set-Cookie'] || header['set-cookie'])
-  if (!raw) return
-
-  const cookies = Array.isArray(raw) ? raw : [raw]
-  const session = cookies
-    .map(item => item.split(';')[0].trim())
-    .find(item => item.startsWith('session='))
-
-  if (session) {
-    wx.setStorageSync(COOKIE_KEY, session)
-  }
-}
+const session = require('./session')
 
 function buildHeader(contentType = 'application/json') {
-  const header = {}
-  if (contentType) {
-    header['Content-Type'] = contentType
-  }
-
-  const token = getToken()
-  if (token) {
-    header['Authorization'] = `Bearer ${token}`
-  }
-
-  const cookie = getCookie()
-  if (cookie) {
-    header['Cookie'] = cookie
-  }
-
-  return header
+  return session.buildHeader(contentType)
 }
 
 function errorMessage(data, fallback) {
@@ -54,10 +16,22 @@ function errorMessage(data, fallback) {
   return fallback
 }
 
+function createError(message, extra) {
+  const error = new Error(message)
+  return Object.assign(error, extra)
+}
+
 function handleUnauthorized() {
-  wx.removeStorageSync('token')
   wx.removeStorageSync('user')
-  wx.removeStorageSync(COOKIE_KEY)
+  session.clear()
+
+  if (typeof getApp === 'function') {
+    const app = getApp()
+    if (app && app.globalData) {
+      app.globalData.user = null
+    }
+  }
+
   wx.reLaunch({
     url: '/pages/login/login'
   })
@@ -72,22 +46,28 @@ function request(options) {
       header: buildHeader(),
       timeout: config.TIMEOUT,
       success: (res) => {
-        saveSessionCookie(res.header)
+        session.saveFromHeader(res.header)
 
         if (res.statusCode >= 200 && res.statusCode < 300 && res.data) {
           if (res.data.code !== undefined && res.data.code !== 0) {
             const message = errorMessage(res.data, '请求失败')
-            logger.warning('API 业务错误', {
-              url: options.url,
-              method: options.method,
+            if (!options.silent) {
+              logger.warning('API 业务错误', {
+                url: options.url,
+                method: options.method,
+                code: res.data.code,
+                message
+              })
+              wx.showToast({
+                title: message,
+                icon: 'none'
+              })
+            }
+            reject(createError(message, {
               code: res.data.code,
-              message
-            })
-            wx.showToast({
-              title: message,
-              icon: 'none'
-            })
-            reject(new Error(message))
+              statusCode: res.statusCode,
+              data: res.data
+            }))
             return
           }
           resolve(res.data)
@@ -95,59 +75,100 @@ function request(options) {
         }
 
         if (res.statusCode === 401) {
+          // 会话失效时先静默重新登录再重试一次，用户无感知
+          if (!options.skipAuthHandler && !options.retried) {
+            Promise.resolve()
+              .then(() => require('./auth').silentLogin())
+              .then(() => request(Object.assign({}, options, {
+                retried: true,
+                skipAuthHandler: true
+              })))
+              .then(resolve)
+              .catch((error) => {
+                if (error && error.statusCode === 401) {
+                  logger.warning('API 请求未授权', {
+                    url: options.url,
+                    method: options.method
+                  })
+                  if (!options.silent) {
+                    handleUnauthorized()
+                  }
+                } else if (!options.silent) {
+                  wx.showToast({
+                    title: (error && error.message) || '登录失败',
+                    icon: 'none'
+                  })
+                }
+                reject(error)
+              })
+            return
+          }
+
           logger.warning('API 请求未授权', {
             url: options.url,
             method: options.method
           })
-          handleUnauthorized()
-          reject(new Error('登录已过期，请重新登录'))
+          if (!options.silent) {
+            handleUnauthorized()
+          }
+          reject(createError('登录已过期，请重新登录', {
+            statusCode: res.statusCode,
+            data: res.data
+          }))
           return
         }
 
         const message = errorMessage(res.data, `请求失败（${res.statusCode}）`)
-        logger.warning('API 响应异常', {
-          url: options.url,
-          method: options.method,
+        if (!options.silent) {
+          logger.warning('API 响应异常', {
+            url: options.url,
+            method: options.method,
+            statusCode: res.statusCode,
+            message
+          })
+          wx.showToast({
+            title: message,
+            icon: 'none'
+          })
+        }
+        reject(createError(message, {
           statusCode: res.statusCode,
-          message
-        })
-        wx.showToast({
-          title: message,
-          icon: 'none'
-        })
-        reject(new Error(message))
+          data: res.data
+        }))
       },
       fail: (err) => {
         const message = err.errMsg || '网络错误'
-        logger.error('API 请求失败', {
-          url: options.url,
-          method: options.method,
-          errMsg: message
-        })
-        wx.showToast({
-          title: message,
-          icon: 'none'
-        })
-        reject(new Error(message))
+        if (!options.silent) {
+          logger.error('API 请求失败', {
+            url: options.url,
+            method: options.method,
+            errMsg: message
+          })
+          wx.showToast({
+            title: message,
+            icon: 'none'
+          })
+        }
+        reject(createError(message, { errMsg: err.errMsg }))
       }
     })
   })
 }
 
-function get(url, data) {
-  return request({ url, method: 'GET', data })
+function get(url, data, options) {
+  return request(Object.assign({ url, method: 'GET', data }, options))
 }
 
-function post(url, data) {
-  return request({ url, method: 'POST', data })
+function post(url, data, options) {
+  return request(Object.assign({ url, method: 'POST', data }, options))
 }
 
-function put(url, data) {
-  return request({ url, method: 'PUT', data })
+function put(url, data, options) {
+  return request(Object.assign({ url, method: 'PUT', data }, options))
 }
 
-function del(url, data) {
-  return request({ url, method: 'DELETE', data })
+function del(url, data, options) {
+  return request(Object.assign({ url, method: 'DELETE', data }, options))
 }
 
 function uploadFile(url, filePath, formData = {}) {
@@ -159,24 +180,28 @@ function uploadFile(url, filePath, formData = {}) {
       formData: formData,
       header: buildHeader(null),
       success: (res) => {
-        saveSessionCookie(res.header)
+        session.saveFromHeader(res.header)
 
         let data
         try {
           data = JSON.parse(res.data)
         } catch (error) {
-          reject(new Error('响应解析失败'))
+          reject(createError('响应解析失败'))
           return
         }
 
         if (data.code === 0) {
           resolve(data)
         } else {
-          reject(new Error(errorMessage(data, '上传失败')))
+          reject(createError(errorMessage(data, '上传失败'), {
+            code: data.code,
+            statusCode: res.statusCode,
+            data
+          }))
         }
       },
       fail: (err) => {
-        reject(new Error(err.errMsg || '网络错误'))
+        reject(createError(err.errMsg || '网络错误', { errMsg: err.errMsg }))
       }
     })
   })
