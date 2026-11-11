@@ -70,8 +70,13 @@ Page({
   },
 
   continueEdit() {
-    wx.navigateTo({
-      url: `/pages/writing/writing?id=${this.data.work.id}`
+    // writing 是 tabBar 页面，只能使用 switchTab；通过全局意图传递要编辑的作文
+    app.globalData.writingIntent = {
+      action: 'edit',
+      id: this.data.work.id
+    }
+    wx.switchTab({
+      url: '/pages/writing/writing'
     })
   },
 

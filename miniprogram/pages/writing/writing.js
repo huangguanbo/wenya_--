@@ -27,18 +27,49 @@ Page({
   autoSaveTimer: null,
   creating: false,
 
-  onLoad(options) {
-    if (!app.globalData.token) {
+  onShow() {
+    if (!app.isLoggedIn()) {
       wx.reLaunch({
         url: '/pages/login/login'
       })
       return
     }
 
-    if (options.id) {
-      this.setData({ writingId: Number(options.id) })
-      this.loadWriting(options.id)
+    // writing 是 tabBar 页面，无法通过 url 参数传值，改用全局意图
+    const intent = app.globalData.writingIntent
+    if (!intent) return
+
+    app.globalData.writingIntent = null
+
+    if (intent.action === 'edit' && intent.id) {
+      this.setData({ writingId: Number(intent.id) })
+      this.loadWriting(intent.id)
+      return
     }
+
+    this.resetDraft()
+  },
+
+  resetDraft() {
+    if (this.autoSaveTimer) {
+      clearTimeout(this.autoSaveTimer)
+      this.autoSaveTimer = null
+    }
+
+    this.setData({
+      title: '',
+      content: '',
+      wordCount: 0,
+      writingId: null,
+      canSubmit: false,
+      messages: [],
+      inputMessage: '',
+      loading: false,
+      saving: false,
+      autoSaveStatus: '',
+      showAiChat: false,
+      scrollToView: ''
+    })
   },
 
   onUnload() {

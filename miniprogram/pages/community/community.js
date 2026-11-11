@@ -91,7 +91,7 @@ Page({
   },
 
   async toggleLike(e) {
-    if (!app.globalData.token) {
+    if (!app.isLoggedIn()) {
       wx.navigateTo({
         url: '/pages/login/login'
       })

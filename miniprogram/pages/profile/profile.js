@@ -23,7 +23,7 @@ Page({
   },
 
   onShow() {
-    if (app.globalData.token) {
+    if (app.isLoggedIn()) {
       this.loadUserData()
     }
   },
@@ -92,6 +92,21 @@ Page({
 
     if (page === '/pages/writing-detail/writing-detail') {
       util.showError('作品列表页暂未开放')
+      return
+    }
+
+    // tabBar 页面只能用 switchTab 跳转
+    const tabPages = [
+      '/pages/index/index',
+      '/pages/writing/writing',
+      '/pages/ranking/ranking',
+      '/pages/community/community',
+      '/pages/profile/profile'
+    ]
+    const path = page.split('?')[0]
+
+    if (tabPages.indexOf(path) !== -1) {
+      wx.switchTab({ url: path })
       return
     }
 

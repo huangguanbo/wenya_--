@@ -28,7 +28,7 @@ Page({
   },
 
   async loadRanking() {
-    if (!app.globalData.token) return
+    if (!app.isLoggedIn()) return
 
     this.setData({ loading: true })
 

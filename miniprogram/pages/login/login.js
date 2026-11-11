@@ -8,7 +8,7 @@ Page({
   },
 
   onLoad() {
-    if (app.globalData.token) {
+    if (app.isLoggedIn()) {
       wx.switchTab({
         url: '/pages/index/index'
       })
@@ -22,10 +22,9 @@ Page({
     util.showLoading('登录中...')
 
     try {
-      const data = await auth.login()
+      const user = await auth.login()
 
-      app.globalData.token = data.token
-      app.globalData.user = data.user
+      app.globalData.user = user
 
       util.hideLoading()
       util.showSuccess('登录成功')

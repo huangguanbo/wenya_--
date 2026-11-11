@@ -22,7 +22,7 @@ Page({
   },
 
   onShow() {
-    if (!app.globalData.token) {
+    if (!app.isLoggedIn()) {
       wx.reLaunch({
         url: '/pages/login/login'
       })
@@ -113,15 +113,21 @@ Page({
   },
 
   goToWriting() {
-    wx.navigateTo({
+    // writing 是 tabBar 页面，只能使用 switchTab
+    app.globalData.writingIntent = { action: 'new' }
+    wx.switchTab({
       url: '/pages/writing/writing'
     })
   },
 
   continueWriting() {
     if (this.data.recentDraft) {
-      wx.navigateTo({
-        url: `/pages/writing/writing?id=${this.data.recentDraft.id}`
+      app.globalData.writingIntent = {
+        action: 'edit',
+        id: this.data.recentDraft.id
+      }
+      wx.switchTab({
+        url: '/pages/writing/writing'
       })
     }
   },

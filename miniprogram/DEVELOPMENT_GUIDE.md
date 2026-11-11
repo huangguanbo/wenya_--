@@ -87,9 +87,13 @@ CORS_ORIGINS = 'https://servicewechat.com,your-backend.com'
 
 ### 登录认证
 
-小程序采用微信登录 + 后端 JWT 认证：
+后端只提供账号密码登录/注册，没有微信登录接口，因此小程序使用「设备级微信身份」静默换号：
 
-1. **微信一键登录**: 调用 `wx.login()` 获取 code，发送到后端换取 token，无需注册
+1. **首次登录**：本地生成并保存设备 UID，据此推导固定用户名/密码，先调用 `/auth/login`；账号不存在时自动调用 `/auth/register` 注册并登录，用户无需填写任何信息。
+2. **后续登录**：复用本地会话 Cookie（Flask-Login），会话失效时自动重新登录并重试请求。
+3. **身份边界**：账号与设备绑定，清除小程序存储或更换设备会生成新账号。
+
+相关代码：`utils/session.js`（Cookie 管理）、`utils/auth.js`（静默登录/注册）。
 
 ### API 调用
 
@@ -115,8 +119,8 @@ const app = getApp()
 // 获取用户信息
 const user = app.globalData.user
 
-// 获取 token
-const token = app.globalData.token
+// 是否已登录
+const loggedIn = app.isLoggedIn()
 ```
 
 ## 页面说明
@@ -160,16 +164,17 @@ const token = app.globalData.token
 
 ### 2. 登录流程
 ```
-用户打开小程序 → 检查本地 token → 有效则直接登录
-                              ↓ 无效
-                        调用 wx.login() → 获取 code
-                              ↓
-                        发送到后端 /auth/wx-login
-                              ↓
-                        获取 token 和用户信息
-                              ↓
-                        存储到本地和 globalData
+用户点击「微信一键登录」
+        ↓
+读取本地设备 UID，推导固定用户名/密码
+        ↓
+POST /auth/login
+        ↓ 401（账号不存在）
+POST /auth/register（使用默认资料）→ 自动登录
+        ↓
+保存用户信息 + 会话 Cookie
 ```
+后续启动时复用 Cookie；任意接口返回 401 会自动重新登录并重试一次。
 
 ### 3. 内容安全
 
